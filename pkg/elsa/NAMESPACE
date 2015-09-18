@@ -1,0 +1,6 @@
+import(sp)
+import(methods)
+import(raster)
+exportClasses(Entrogram)
+useDynLib(elsa)
+exportPattern("^[[:alpha:]]+")

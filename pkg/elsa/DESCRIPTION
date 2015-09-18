@@ -1,0 +1,12 @@
+Package: elsa
+Type: Package
+Title: Entropy-based Local indicator of Spatial Association
+Version: 0.0-2
+Date: 2015-08-19
+Author: Babak Naimi
+Depends: methods, sp (>= 1.0-13), raster
+Suggests: rgdal (>= 0.6-28)
+Maintainer: Babak Naimi <naimi.b@gmail.com>
+Description: A framework that provides the methods for quantifying local indicator of spatial association (ELSA), can be used for both continuous and categorical data. Moreover, global spatial structure can be measured using a variogram-like diagram, called entrogram.
+License: GPL (>= 3)
+URL: http://r-gis.net
