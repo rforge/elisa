@@ -28,11 +28,12 @@ elsa(x,d,nc,categorical,dif,...)
 }
 
 \value{
-\item{RasterLayer}{if \code{x} is a \code{RasterLayer}
+\item{RasterLayer}{if \code{x} is a \code{RasterLayer}}
 
 }
 
-\references{Naimi. B. et al. (under review) ELSA: An Entropy-based Local indicators of Spatial Association, Geographical Analysis;
+\references{
+Naimi. B. et al. (under review) ELSA: An Entropy-based Local indicators of Spatial Association, Geographical Analysis;
 
 }
 
@@ -43,7 +44,7 @@ elsa(x,d,nc,categorical,dif,...)
 
 
 \examples{
-
+#
 }
 
 \keyword{spatial}

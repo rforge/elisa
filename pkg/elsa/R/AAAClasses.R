@@ -16,3 +16,11 @@ setClass("Entrogram",
            entrogramCloud=NULL
            )
 )
+#-------
+setClass("neighbours",
+         representation(distance1="numeric",
+                        distance2="numeric",
+                        neighbours='list'
+         )
+)
+

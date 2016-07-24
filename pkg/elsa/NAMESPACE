@@ -1,6 +1,7 @@
 import(sp)
 import(methods)
 import(raster)
-exportClasses(Entrogram)
+exportClasses(Entrogram, neighbours)
+exportMethods(elsa,dneigh,categorize,entrogram,nclass,dif2list,elsa.test)
 useDynLib(elsa)
 exportPattern("^[[:alpha:]]+")

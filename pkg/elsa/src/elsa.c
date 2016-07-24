@@ -18,8 +18,8 @@ SEXP elsa(SEXP v, SEXP nc, SEXP nr, SEXP nclass, SEXP rr, SEXP cc) {
   R_len_t i, j;
   
   SEXP ans;
-  double *xans, *xv;
-  int *xrr, *xcc;
+  double *xans;
+  int *xrr, *xcc, *xv;
   
   nrow=INTEGER(nr)[0];
   ncol=INTEGER(nc)[0];
@@ -43,17 +43,18 @@ SEXP elsa(SEXP v, SEXP nc, SEXP nr, SEXP nclass, SEXP rr, SEXP cc) {
   ngb=length(rr);
   
   xans=REAL(ans);
-  xv=REAL(v);
+  xv=INTEGER(v);
   xrr=INTEGER(rr);
   xcc=INTEGER(cc);
   
   for (c=0;c < n;c++)  {
+    R_CheckUserInterrupt();
     xi=xv[c];
     if (!R_IsNA(xi)) {
       row = (c / ncol) + 1;
       col = (c + 1) - ((row - 1) * ncol);
       
-      double xn[ngb];
+      int xn[ngb];
       q=-1;
       for (i=0; i < ngb; i++) {
         nnr= row + xrr[i];
@@ -129,8 +130,8 @@ SEXP elsa_cell(SEXP v, SEXP nc, SEXP nr, SEXP nclass, SEXP rr, SEXP cc, SEXP cel
   R_len_t i, j;
   
   SEXP ans;
-  double *xans, *xv;
-  int *xrr, *xcc, *xcells;
+  double *xans;
+  int *xrr, *xcc, *xcells, *xv;
   
   nrow=INTEGER(nr)[0];
   ncol=INTEGER(nc)[0];
@@ -138,7 +139,7 @@ SEXP elsa_cell(SEXP v, SEXP nc, SEXP nr, SEXP nclass, SEXP rr, SEXP cc, SEXP cel
   
   n=length(cells);
   
-  PROTECT(v = coerceVector(v, REALSXP));
+  PROTECT(v = coerceVector(v, INTSXP));
   ++nProtected;
   
   PROTECT(ans = allocVector(REALSXP, n));
@@ -157,7 +158,7 @@ SEXP elsa_cell(SEXP v, SEXP nc, SEXP nr, SEXP nclass, SEXP rr, SEXP cc, SEXP cel
   ngb=length(rr);
   
   xans=REAL(ans);
-  xv=REAL(v);
+  xv=INTEGER(v);
   xrr=INTEGER(rr);
   xcc=INTEGER(cc);
   xcells=INTEGER(cells);
@@ -169,7 +170,7 @@ SEXP elsa_cell(SEXP v, SEXP nc, SEXP nr, SEXP nclass, SEXP rr, SEXP cc, SEXP cel
       row = (cn / ncol) + 1;
       col = (cn + 1) - ((row - 1) * ncol);
       
-      double xn[ngb];
+      int xn[ngb];
       q=-1;
       for (i=0; i < ngb; i++) {
         nnr= row + xrr[i];
@@ -236,7 +237,94 @@ SEXP elsa_cell(SEXP v, SEXP nc, SEXP nr, SEXP nclass, SEXP rr, SEXP cc, SEXP cel
 }
 //----------
 
-SEXP elsa_vector(SEXP v, SEXP x, SEXP y, SEXP nclass, SEXP d) {
+
+SEXP elsa_vector(SEXP v, SEXP nb, SEXP nclass) {
+  int nProtected=0;
+  int  ncl, n, a, q,xi;
+  double e, w, s,  qq, count;
+  R_len_t i, j, c;
+  
+  SEXP ans;
+  double *xans;
+  int *xv;
+  ncl=INTEGER(nclass)[0];
+  n=length(v);
+  
+  PROTECT(v = coerceVector(v, INTSXP));
+  ++nProtected;
+  
+  PROTECT(ans = allocVector(REALSXP, n));
+  ++nProtected;
+  
+  xans=REAL(ans);
+  xv=INTEGER(v);
+  
+  for (c=0;c < n;c++)  {
+    R_CheckUserInterrupt();
+    xi=xv[c];
+    if (!R_IsNA(xi)) {
+      
+      q = length(VECTOR_ELT(nb,c));
+      
+      int xn[q+1];
+      
+      for (i=0;i < q;i++) {
+        xn[i]=xv[INTEGER_POINTER(VECTOR_ELT(nb,c))[i] - 1];
+      }
+      
+      xn[q]=xi;
+      
+      // sort
+      for (i=0;i <= (q-1);i++) {
+        for (j=i+1;j <= q;j++) {
+          if (xn[i] > xn[j]) {
+            a=xn[i];
+            xn[i]=xn[j];
+            xn[j]=a;
+          }
+        }
+      }
+      //------
+      
+      a=xn[0];
+      count=1;
+      e=0;
+      qq=q+1;
+      
+      for (i=1;i <= q;i++) {
+        if (xn[i] != a) {
+          e = e + ((count / qq) * log2(count / qq));
+          a=xn[i];
+          count=1;
+        } else {
+          count+=1;
+        }
+      }
+      e = e + ((count / qq) * log2(count / qq));
+      w=0;
+      for (i=0; i <= q;i++) {
+        w = w + abs(xn[i] - xi);
+      }
+      w = w / ((qq - 1) * (ncl - 1));
+      
+      if (qq > ncl) {
+        s = log2(ncl);
+      } else {
+        s = log2(qq);
+      }
+      
+      xans[c] = (-e * w) / s;
+      
+    } else {
+      xans[c]=R_NaReal;
+    }
+  }
+  UNPROTECT(nProtected);
+  return(ans);
+}
+//////
+/*
+SEXP elsa_vector2(SEXP v, SEXP x, SEXP y, SEXP nclass, SEXP d) {
   int nProtected=0;
   int c, q, ncl, n, a;
   double e, w, s, xi, qq, count, dist, dxy, xxi, yyi;
@@ -314,7 +402,7 @@ SEXP elsa_vector(SEXP v, SEXP x, SEXP y, SEXP nclass, SEXP d) {
       e = e + ((count / qq) * log2(count / qq));
       w=0;
       for (i=0; i <= q;i++) {
-        w = w + abs(xn[i] - xi);
+        w = w + fabs(xn[i] - xi);
       }
       w = w / ((qq - 1) * (ncl - 1));
       
@@ -334,3 +422,4 @@ SEXP elsa_vector(SEXP v, SEXP x, SEXP y, SEXP nclass, SEXP d) {
   return(ans);
   
 }
+ */

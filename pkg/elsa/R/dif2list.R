@@ -35,7 +35,7 @@ setMethod('dif2list', signature(x='data.frameORmatrix'),
               u <- unlist(strsplit(as.character(x[1,2]),''))
               pattern <- rep(1,length(u))
             }
-            if (!all(sapply(s,function(x) {length(x) == sum(pattern)}))) stop("the provided codes does not match the pattern or have inconsistency!")
+            
             p <- list()
             o <- 1
             for (j in 1:length(pattern)) {
@@ -44,7 +44,7 @@ setMethod('dif2list', signature(x='data.frameORmatrix'),
             }
             
             s <- sapply(x[,2],function(x) {strsplit(as.character(x),'')})
-            
+            if (!all(sapply(s,function(x) {length(x) == sum(pattern)}))) stop("the provided codes does not match the pattern or have inconsistency!")
             
             d <- data.frame(matrix(nrow=length(s),ncol=length(pattern)))
             for (i in 1:length(s)) {

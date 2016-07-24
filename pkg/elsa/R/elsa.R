@@ -1,6 +1,6 @@
 # Author: Babak Naimi, naimi.b@gmail.com
-# Date :  August 2014
-# Version 1.0
+# Date :  July 2016
+# Version 1.2
 # Licence GPL v3 
 
 
@@ -144,17 +144,17 @@ setMethod('elsa', signature(x='RasterLayer'),
             if (canProcessInMemory(out)) {
               if (categorical) {
                 if (missing(cells)) {
-                  out[] <- .Call('elsac', as.vector(x[]), as.integer(ncl), as.integer(nrw), as.integer(nc), as.integer(w[,1]), as.integer(w[,2]),as.integer(classes),dif)
+                  out[] <- .Call('elsac', as.integer(x[]), as.integer(ncl), as.integer(nrw), as.integer(nc), as.integer(w[,1]), as.integer(w[,2]),as.integer(classes),dif)
                   if (filename != '') out <- writeRaster(out, filename, ...)
                 } else {
-                  out <- .Call('elsac_cell', as.vector(x[]), as.integer(ncl), as.integer(nrw), as.integer(nc), as.integer(w[,1]), as.integer(w[,2]),as.integer(classes),dif, as.integer(cells))
+                  out <- .Call('elsac_cell', as.integer(x[]), as.integer(ncl), as.integer(nrw), as.integer(nc), as.integer(w[,1]), as.integer(w[,2]),as.integer(classes),dif, as.integer(cells))
                 }
               } else {
                 if (missing(cells)) {
-                  out[] <- .Call('elsa', as.vector(x[]), as.integer(ncl), as.integer(nrw), as.integer(nc), as.integer(w[,1]), as.integer(w[,2]))
+                  out[] <- .Call('elsa', as.integer(x[]), as.integer(ncl), as.integer(nrw), as.integer(nc), as.integer(w[,1]), as.integer(w[,2]))
                   if (filename != '') out <- writeRaster(out, filename, ...)
                 } else {
-                  out <- .Call('elsa_cell', as.vector(x[]), as.integer(ncl), as.integer(nrw), as.integer(nc), as.integer(w[,1]), as.integer(w[,2]),as.integer(cells))
+                  out <- .Call('elsa_cell', as.integer(x[]), as.integer(ncl), as.integer(nrw), as.integer(nc), as.integer(w[,1]), as.integer(w[,2]),as.integer(cells))
                 }
               }
             } else {
@@ -176,9 +176,9 @@ setMethod('elsa', signature(x='RasterLayer'),
                 for (i in 2:(tr$n-1)) {
                   v <- getValues(x, row=tr$row[i]-addr, nrows=tr$nrows[i]+(2*addr))
                   if (!categorical) {
-                    v <- .Call('elsa', v, as.integer(ncl), as.integer(nrw), as.integer(nc), as.integer(w[,1]), as.integer(w[,2]))
+                    v <- .Call('elsa', as.integer(v), as.integer(ncl), as.integer(nrw), as.integer(nc), as.integer(w[,1]), as.integer(w[,2]))
                   } else {
-                    v <- .Call('elsac', v, as.integer(ncl), as.integer(nrw), as.integer(nc), as.integer(w[,1]), as.integer(w[,2]),as.integer(classes),dif)
+                    v <- .Call('elsac', as.integer(v), as.integer(ncl), as.integer(nrw), as.integer(nc), as.integer(w[,1]), as.integer(w[,2]),as.integer(classes),dif)
                   }
                   st <- (addr * ncl)+1
                   ex <- length(v) - (addr * ncl)
@@ -189,9 +189,9 @@ setMethod('elsa', signature(x='RasterLayer'),
                 i <- tr$n
                 v <- getValues(x, row=tr$row[i]-addr, nrows=tr$nrows[i]+addr)
                 if (!categorical) {
-                  v <- .Call('elsa', v, as.integer(ncl), as.integer(nrw), as.integer(nc), as.integer(w[,1]), as.integer(w[,2]))
+                  v <- .Call('elsa', as.integer(v), as.integer(ncl), as.integer(nrw), as.integer(nc), as.integer(w[,1]), as.integer(w[,2]))
                 } else {
-                  v <- .Call('elsac', v, as.integer(ncl), as.integer(nrw), as.integer(nc), as.integer(w[,1]), as.integer(w[,2]),as.integer(classes),dif)
+                  v <- .Call('elsac', as.integer(v), as.integer(ncl), as.integer(nrw), as.integer(nc), as.integer(w[,1]), as.integer(w[,2]),as.integer(classes),dif)
                 }
                 st <- (addr * nc)+1
                 ex <- length(v)
@@ -204,9 +204,9 @@ setMethod('elsa', signature(x='RasterLayer'),
                 cls <- cells[which(cells <= (tr$nrows[1]) * ncl)]
                 if (length(cls) > 0) {
                   if (!categorical) {
-                    v <- .Call('elsa_cell', v, as.integer(ncl), as.integer(nrw), as.integer(nc), as.integer(w[,1]), as.integer(w[,2]), as.integer(cls))
+                    v <- .Call('elsa_cell', as.integer(v), as.integer(ncl), as.integer(nrw), as.integer(nc), as.integer(w[,1]), as.integer(w[,2]), as.integer(cls))
                   } else {
-                    v <- .Call('elsac_cell', v, as.integer(ncl), as.integer(nrw), as.integer(nc), as.integer(w[,1]), as.integer(w[,2]),as.integer(classes),dif, as.integer(cls))
+                    v <- .Call('elsac_cell', as.integer(v), as.integer(ncl), as.integer(nrw), as.integer(nc), as.integer(w[,1]), as.integer(w[,2]),as.integer(classes),dif, as.integer(cls))
                   }
                   out <- c(out, v)
                 }
@@ -217,9 +217,9 @@ setMethod('elsa', signature(x='RasterLayer'),
                     cls <- cls - ((tr$row[i]-addr-1)*ncl)
                     v <- getValues(x, row=tr$row[i]-addr, nrows=tr$nrows[i]+(2*addr))
                     if (!categorical) {
-                      v <- .Call('elsa_cell', v, as.integer(ncl), as.integer(nrw), as.integer(nc), as.integer(w[,1]), as.integer(w[,2]), as.integer(cls))
+                      v <- .Call('elsa_cell', as.integer(v), as.integer(ncl), as.integer(nrw), as.integer(nc), as.integer(w[,1]), as.integer(w[,2]), as.integer(cls))
                     } else {
-                      v <- .Call('elsac_cell', v, as.integer(ncl), as.integer(nrw), as.integer(nc), as.integer(w[,1]), as.integer(w[,2]),as.integer(classes),dif, as.integer(cls))
+                      v <- .Call('elsac_cell', as.integer(v), as.integer(ncl), as.integer(nrw), as.integer(nc), as.integer(w[,1]), as.integer(w[,2]),as.integer(classes),dif, as.integer(cls))
                     }
                     out <- c(out, v)
                     pbStep(pb)
@@ -232,9 +232,9 @@ setMethod('elsa', signature(x='RasterLayer'),
                 if (length(cls) > 0) {
                   v <- getValues(x, row=tr$row[i]-addr, nrows=tr$nrows[i]+addr)
                   if (!categorical) {
-                    v <- .Call('elsa_cell', v, as.integer(ncl), as.integer(nrw), as.integer(nc), as.integer(w[,1]), as.integer(w[,2]), as.integer(cls))
+                    v <- .Call('elsa_cell', as.integer(v), as.integer(ncl), as.integer(nrw), as.integer(nc), as.integer(w[,1]), as.integer(w[,2]), as.integer(cls))
                   } else {
-                    v <- .Call('elsac_cell', v, as.integer(ncl), as.integer(nrw), as.integer(nc), as.integer(w[,1]), as.integer(w[,2]),as.integer(classes),dif, as.integer(cls))
+                    v <- .Call('elsac_cell', as.integer(v), as.integer(ncl), as.integer(nrw), as.integer(nc), as.integer(w[,1]), as.integer(w[,2]),as.integer(classes),dif, as.integer(cls))
                   }
                   out <- c(out, v)
                   pbStep(pb)
@@ -260,13 +260,14 @@ setMethod('elsa', signature(x='SpatialPointsDataFrame'),
               zcol <- w
             } else if (is.numeric(zcol)) {
               zcol <- zcol[1]
-              if (zcol > ncol(x@data)) stop('the number ')
+              if (zcol > ncol(x@data)) stop('the zcol number is greater than the number of columns in data!')
             } else stop("zcol should be a character or a number!")
             
-            x <- as(x,'data.frame')
-            yy <- x[,2]
-            xx <- x[,1]
-            x <- x[,(zcol+2)]
+            xy <- coordinates(x)
+            yy <- xy[,2]
+            xx <- xy[,1]
+            x <- x@data[,zcol]
+            rm(xy)
             
             if (is.character(x) || is.factor(x)) {
               x <- as.character(x)
@@ -320,7 +321,7 @@ setMethod('elsa', signature(x='SpatialPointsDataFrame'),
             if (categorical) {
               
             } else {
-              .Call('elsa_vector', as.vector(x), as.vector(xx), as.vector(yy), as.integer(nc), as.numeric(d))
+              .Call('elsa_vector', as.integer(x), as.vector(xx), as.vector(yy), as.integer(nc), as.numeric(d))
             }
             
           }

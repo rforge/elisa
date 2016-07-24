@@ -55,13 +55,18 @@ setMethod('elsa.test', signature(x='RasterLayer'),
               }
             }
             
-            
+            nNA <- which(!is.na(x[]))
+            null.model <- calc(x,function(x) { x[!is.na(x)] <- sample(classes,length(x[!is.na(x)]),replace=TRUE); x})
+            null.model <- null.model[nNA]
             if (missing(cells)) {
               e1 <- elsa(x,d=d,nc=nc,categorical=categorical,dif=dif)
               o2 <- x
-              o2 <- calc(o2,function(x) { x[!is.na(x)] <- 0; x})
+              #o2 <- calc(o2,function(x) { x[!is.na(x)] <- 0; x})
+              o2[nNA] <- 0
+              o1 <- raster(x)
               for (i in 1:n) {
-                o1 <- calc(x,function(x) { x[!is.na(x)] <- sample(classes,length(x[!is.na(x)]),replace=TRUE); x})
+                #o1 <- calc(x,function(x) { x[!is.na(x)] <- sample(null.model,length(x[!is.na(x)]),replace=TRUE); x})
+                o1[nNA] <- sample(null.model,length(null.model),replace=TRUE)
                 e2 <- elsa(o1,d1=d1,d2=d2,nc=nc,categorical=categorical,dif=dif)
                 ee <- e1 - e2
                 ee <- calc(ee,function(x) {x[x > 0] <- 1; x[x <= 0] = 0; x})
@@ -76,7 +81,8 @@ setMethod('elsa.test', signature(x='RasterLayer'),
               e1 <- elsa(x,d=d,nc=nc,categorical=categorical,dif=dif,cells=cells)
               o2 <- rep(0,length(cells))
               for (i in 1:n) {
-                o1 <- calc(x,function(x) { x[!is.na(x)] <- sample(classes,length(x[!is.na(x)]),replace=TRUE); x})
+                o1[nNA] <- sample(null.model,length(null.model),replace=TRUE)
+                #o1 <- calc(x,function(x) { x[!is.na(x)] <- sample(classes,length(x[!is.na(x)]),replace=TRUE); x})
                 e2 <- elsa(o1,d1=d1,d2=d2,nc=nc,categorical=categorical,dif=dif,cells=cells)
                 ee <- e1 - e2
                 ee <- ifelse(ee > 0,1,0)
