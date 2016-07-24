@@ -247,27 +247,195 @@ setMethod('elsa', signature(x='RasterLayer'),
 )  
 
 #---------------
+# 
+# setMethod('elsa', signature(x='SpatialPointsDataFrame'), 
+#           function(x,d,nc,categorical,dif,zcol,...) {
+#             if (missing(d)) stop('d is missed!')
+#             if (missing(zcol)) {
+#               if (ncol(x@data) > 1) stop("zcol should be specified!")
+#               else zcol <- 1
+#             } else if (is.character(zcol)) {
+#               w <- which(colnames(x@data) == zcol[1])
+#               if (w != 1) stop('the specified variable in zcol does not exist in the data')
+#               zcol <- w
+#             } else if (is.numeric(zcol)) {
+#               zcol <- zcol[1]
+#               if (zcol > ncol(x@data)) stop('the zcol number is greater than the number of columns in data!')
+#             } else stop("zcol should be a character or a number!")
+#             
+#             xy <- coordinates(x)
+#             yy <- xy[,2]
+#             xx <- xy[,1]
+#             x <- x@data[,zcol]
+#             rm(xy)
+#             
+#             if (is.character(x) || is.factor(x)) {
+#               x <- as.character(x)
+#               if (!missing(categorical) && !categorical) warning("you specified a categorical variable, so categorical changed to TRUE!")
+#               categorical <- TRUE
+#             }
+#             
+#             if (!missing(nc)) {
+#               if (missing(categorical)) {
+#                 if (missing(dif)) categorical <- FALSE
+#                 else {
+#                   categorical <- TRUE
+#                   cat("input data is considered categorical, and nc is ignored!\n")
+#                 }
+#               } 
+#             } else {
+#               if (missing(categorical) && !missing(dif)) categorical <- TRUE
+#             }
+#             #----
+#             if (missing(categorical) || !is.logical(categorical)) {
+#               # guessing whether the layer is categorical:
+#               if (.is.categorical(x)) {
+#                 categorical <- TRUE
+#                 cat("the specified variable is considered as categorical...\n")
+#               } else {
+#                 categorical <- FALSE
+#                 cat("the specified variable is considered continuous...\n")
+#               }
+#             }
+#             #----
+#             if (!categorical && missing(nc)) {
+#               nc <- nclass(x)
+#             } else if (categorical) {
+#               classes <- unique(x)
+#               nc <- length(classes)
+#             }
+#             #-----
+#             
+#             if (categorical) {
+#               if (missing(dif)) {
+#                 dif <- rep(1,nc*nc)
+#                 for (i in 1:nc) dif[(i-1)*nc+i] <-0
+#               } else {
+#                 dif <- .checkDif(dif,classes)
+#               }
+#             }
+#             #-----
+#             
+#             if (!categorical) x <- categorize(x,nc)
+#             
+#             if (categorical) {
+#               
+#             } else {
+#               .Call('elsa_vector', as.integer(x), as.vector(xx), as.vector(yy), as.integer(nc), as.numeric(d))
+#             }
+#             
+#           }
+# )  
+
+
+
 
 setMethod('elsa', signature(x='SpatialPointsDataFrame'), 
           function(x,d,nc,categorical,dif,zcol,...) {
             if (missing(d)) stop('d is missed!')
+            else if (!class(d) %in% c('numeric','integer','neighbours')) stop('d should be either a number (distance) or an object of class neighbours (created by dneigh function')
+            
+            if (!inherits(d,'neighbours')) d <- dneigh(x, d[1])
+            d <- d@neighbours
+            
             if (missing(zcol)) {
               if (ncol(x@data) > 1) stop("zcol should be specified!")
               else zcol <- 1
             } else if (is.character(zcol)) {
               w <- which(colnames(x@data) == zcol[1])
-              if (w != 1) stop('the specified variable in zcol does not exist in the data')
+              if (w == 0) stop('the specified variable in zcol does not exist in the data')
               zcol <- w
             } else if (is.numeric(zcol)) {
               zcol <- zcol[1]
               if (zcol > ncol(x@data)) stop('the zcol number is greater than the number of columns in data!')
             } else stop("zcol should be a character or a number!")
             
-            xy <- coordinates(x)
-            yy <- xy[,2]
-            xx <- xy[,1]
             x <- x@data[,zcol]
-            rm(xy)
+            
+            if (is.character(x) || is.factor(x)) {
+              x <- as.character(x)
+              if (!missing(categorical) && !categorical) warning("you specified a categorical variable, so categorical changed to TRUE!")
+              categorical <- TRUE
+            }
+            
+            if (!missing(nc)) {
+              if (missing(categorical)) {
+                if (missing(dif)) categorical <- FALSE
+                else {
+                  categorical <- TRUE
+                  cat("input data is considered categorical, and nc is ignored!\n")
+                }
+              } 
+            } else {
+              if (missing(categorical) && !missing(dif)) categorical <- TRUE
+            }
+            #----
+            if (missing(categorical) || !is.logical(categorical)) {
+              # guessing whether the layer is categorical:
+              if (.is.categorical(x)) {
+                categorical <- TRUE
+                cat("the specified variable is considered as categorical...\n")
+              } else {
+                categorical <- FALSE
+                cat("the specified variable is considered continuous...\n")
+              }
+            }
+            #----
+            if (!categorical && missing(nc)) {
+              nc <- nclass(x)
+            } else if (categorical) {
+              classes <- unique(x)
+              nc <- length(classes)
+            }
+            #-----
+            
+            if (categorical) {
+              if (missing(dif)) {
+                dif <- rep(1,nc*nc)
+                for (i in 1:nc) dif[(i-1)*nc+i] <-0
+              } else {
+                dif <- .checkDif(dif,classes)
+              }
+            }
+            #-----
+            
+            if (!categorical) x <- categorize(x,nc)
+            
+            
+            if (categorical) {
+              .Call('elsac_vector', as.integer(x), d, as.integer(nc), as.integer(classes),dif)
+            } else {
+              .Call('elsa_vector', as.integer(x), d, as.integer(nc))
+            }
+            
+          }
+)  
+
+
+setMethod('elsa', signature(x='SpatialPolygonsDataFrame'), 
+          function(x,d,nc,categorical,dif,zcol,method,...) {
+            if (missing(d)) stop('d is missed!')
+            else if (!class(d) %in% c('numeric','integer','neighbours')) stop('d should be either a number (distance) or an object of class neighbours (created by dneigh function')
+            
+            if (missing(method)) method <- 'centroid'
+            
+            if (!inherits(d,'neighbours')) d <- dneigh(x, d[1],method = method)
+            d <- d@neighbours
+            
+            
+              if (missing(zcol)) {
+              if (ncol(x@data) > 1) stop("zcol should be specified!")
+              else zcol <- 1
+            } else if (is.character(zcol)) {
+              w <- which(colnames(x@data) == zcol[1])
+              if (w == 0) stop('the specified variable in zcol does not exist in the data')
+              zcol <- w
+            } else if (is.numeric(zcol)) {
+              zcol <- zcol[1]
+              if (zcol > ncol(x@data)) stop('the zcol number is greater than the number of columns in data!')
+            } else stop("zcol should be a character or a number!")
+            
+            x <- x@data[,zcol]
             
             if (is.character(x) || is.factor(x)) {
               x <- as.character(x)
@@ -319,9 +487,9 @@ setMethod('elsa', signature(x='SpatialPointsDataFrame'),
             if (!categorical) x <- categorize(x,nc)
             
             if (categorical) {
-              
+              .Call('elsac_vector', as.integer(x), d, as.integer(nc), as.integer(classes),dif)
             } else {
-              .Call('elsa_vector', as.integer(x), as.vector(xx), as.vector(yy), as.integer(nc), as.numeric(d))
+              .Call('elsa_vector', as.integer(x), d, as.integer(nc))
             }
             
           }

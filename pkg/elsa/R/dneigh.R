@@ -117,13 +117,13 @@ setMethod('dneigh', signature(x='SpatialPolygons',d='numeric'),
           function(x, d, longlat,method,...) {
             if (missing(longlat) || is.null(longlat) || !is.logical(longlat)) longlat <- .is.projected(x)
             
-            if (missing(method) || is.null(method)) method <- 'bound'
+            if (missing(method) || is.null(method)) method <- 'centroid'
             else {
-              if (tolower(method)[0] %in% c('bnd','bound','boundary','bond','b')) method <- 'bound'
-              else if (tolower(method)[0] %in% c('center','centre','cent','cnt','c','centroid','centriod','ce','cen')) method <- 'centroid'
+              if (tolower(method)[1] %in% c('bnd','bound','boundary','bond','b')) method <- 'bound'
+              else if (tolower(method)[1] %in% c('center','centre','cent','cnt','c','centroid','centriod','ce','cen')) method <- 'centroid'
               else {
-                warning('method is not recognized; the default (bound) is used!')
-                method <- 'bound'
+                warning('method is not recognized; the default (centroid) is used!')
+                method <- 'centroid'
               }
             }
             

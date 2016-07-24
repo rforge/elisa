@@ -292,19 +292,25 @@ SEXP elsac_cell(SEXP v, SEXP nc, SEXP nr, SEXP nclass, SEXP rr, SEXP cc, SEXP cl
   return(ans);
   
 }
-//////
 
-SEXP elsac_vector(SEXP v, SEXP nb, SEXP nclass) {
+////------
+
+SEXP elsac_vector(SEXP v, SEXP nb,  SEXP nclass, SEXP classes, SEXP dif) {
   int nProtected=0;
-  int  ncl, n, a, q,xi;
-  double e, w, s,  qq, count;
-  R_len_t i, j, c;
+  int c,  ngb, q, ncl, n, a, nw;
+  double e, w, s, xi, qq, count, maxW;
+  
+  R_len_t i, j;
   
   SEXP ans;
-  double *xans;
-  int *xv;
-  ncl=INTEGER(nclass)[0];
+  
+  double *xans, *xdif;
+  int *xv, *xcls;
+  
+  ncl=INTEGER(nclass)[0]; //nclass for categorical variables referes to the number of unique classes
+  
   n=length(v);
+  
   
   PROTECT(v = coerceVector(v, INTSXP));
   ++nProtected;
@@ -312,23 +318,59 @@ SEXP elsac_vector(SEXP v, SEXP nb, SEXP nclass) {
   PROTECT(ans = allocVector(REALSXP, n));
   ++nProtected;
   
+  
+  PROTECT(classes = coerceVector(classes, INTSXP));
+  ++nProtected;
+  
+  PROTECT(dif = coerceVector(dif, REALSXP));
+  ++nProtected;
+  
   xans=REAL(ans);
   xv=INTEGER(v);
+  xcls=INTEGER(classes);
+  xdif=REAL(dif);
+  
+  maxW=0;
+  for (i=0; i < length(dif);i++) {
+    if (xdif[i] > maxW) maxW=xdif[i];
+  }
   
   for (c=0;c < n;c++)  {
-    R_CheckUserInterrupt();
     xi=xv[c];
     if (!R_IsNA(xi)) {
-      
-      q = length(VECTOR_ELT(nb,c));
-      
-      int xn[q+1];
-      
-      for (i=0;i < q;i++) {
-        xn[i]=xv[INTEGER_POINTER(VECTOR_ELT(nb,c))[i] - 1];
+      ngb = length(VECTOR_ELT(nb,c));
+      int xn[ngb+1], xw[ngb+1];
+      //------
+      for (i=0; i < ncl;i++) {
+        if (xcls[i] == xi) {
+          nw=i;
+          break;
+        }
       }
-      
-      xn[q]=xi;
+      //-------
+      q=-1;
+      for (i=0;i < ngb;i++) {
+        a=xv[INTEGER_POINTER(VECTOR_ELT(nb,c))[i] - 1];
+        if (!R_IsNA(a)) {
+          q+=1;
+          xn[q]=a;
+          for (j=0;j < ncl;j++) {
+            if (xcls[j] == xn[q]) {
+              xw[q]=xdif[(nw*ncl)+j];
+              break;
+            }
+          }
+        } 
+      }
+      q+=1;
+      xn[q]=xi; //adding also xi to xn array
+      for (j=0;j < ncl;j++) {
+        if (xcls[j] == xn[q]) {
+          xw[q]=xdif[(nw*ncl)+j];
+          break;
+        }
+      }
+      ////////
       
       // sort
       for (i=0;i <= (q-1);i++) {
@@ -341,7 +383,6 @@ SEXP elsac_vector(SEXP v, SEXP nb, SEXP nclass) {
         }
       }
       //------
-      
       a=xn[0];
       count=1;
       e=0;
@@ -359,9 +400,9 @@ SEXP elsac_vector(SEXP v, SEXP nb, SEXP nclass) {
       e = e + ((count / qq) * log2(count / qq));
       w=0;
       for (i=0; i <= q;i++) {
-        w = w + abs(xn[i] - xi);
+        w = w + xw[i];
       }
-      w = w / ((qq - 1) * (ncl - 1));
+      w = w / ((qq - 1) * maxW);
       
       if (qq > ncl) {
         s = log2(ncl);
@@ -377,4 +418,6 @@ SEXP elsac_vector(SEXP v, SEXP nb, SEXP nclass) {
   }
   UNPROTECT(nProtected);
   return(ans);
+  
 }
+//------

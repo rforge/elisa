@@ -2,6 +2,7 @@
 
 \alias{elsa}
 \alias{elsa,SpatialPointsDataFrame-method}
+\alias{elsa,SpatialPolygonsDataFrame-method}
 \alias{elsa,RasterLayer-method}
 
 

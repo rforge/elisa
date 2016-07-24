@@ -1,6 +1,7 @@
 /* Babak Naimi, August 2014 
    naimi.b@gmail.com
 */
+
 #include <R.h>
 #include <Rinternals.h>
 #include <stdio.h>
@@ -164,6 +165,7 @@ SEXP elsa_cell(SEXP v, SEXP nc, SEXP nr, SEXP nclass, SEXP rr, SEXP cc, SEXP cel
   xcells=INTEGER(cells);
   
   for (c=0;c < n;c++)  {
+    R_CheckUserInterrupt();
     cn=xcells[c]-1;
     xi=xv[cn];
     if (!R_IsNA(xi)) {
@@ -240,7 +242,7 @@ SEXP elsa_cell(SEXP v, SEXP nc, SEXP nr, SEXP nclass, SEXP rr, SEXP cc, SEXP cel
 
 SEXP elsa_vector(SEXP v, SEXP nb, SEXP nclass) {
   int nProtected=0;
-  int  ncl, n, a, q,xi;
+  int  ncl, n, a, q,xi, ngb;
   double e, w, s,  qq, count;
   R_len_t i, j, c;
   
@@ -264,14 +266,18 @@ SEXP elsa_vector(SEXP v, SEXP nb, SEXP nclass) {
     xi=xv[c];
     if (!R_IsNA(xi)) {
       
-      q = length(VECTOR_ELT(nb,c));
+      ngb = length(VECTOR_ELT(nb,c));
       
-      int xn[q+1];
-      
-      for (i=0;i < q;i++) {
-        xn[i]=xv[INTEGER_POINTER(VECTOR_ELT(nb,c))[i] - 1];
+      int xn[ngb+1];
+      q=-1;
+      for (i=0;i < ngb;i++) {
+        a=xv[INTEGER_POINTER(VECTOR_ELT(nb,c))[i] - 1];
+        if (!R_IsNA(a)) {
+          q+=1;
+          xn[i]=a;
+        }
       }
-      
+      q+=1;
       xn[q]=xi;
       
       // sort
