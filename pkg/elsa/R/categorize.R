@@ -1,37 +1,12 @@
 # Author: Babak Naimi, naimi.b@gmail.com
-# Date :  August 2014
-# Version 1.0
+# Date :  July 2016
+# Version 1.1
 # Licence GPL v3 
 
-#' categorizing continious data
-#' 
-#' A function to categorize numerical data in the form of a raster layer, or a vector
-#' 
-#' @aliases categorize, categorize,Raster-method, categorize,numeric-method
-#' 
-#' @usage categorize(x,nc,filename,...)
-#' 
-#' @param x A \code{RasterLayer} or a \code{numerical vector}
-#' @param nc Number of classes, if missing, it will be automatically detected
-#' @param filename A character specifying the output Raster file name (if x is RasterLayer)
-#' @param ... Additional parameters for \code{\link[raster]{writeRaster}} function (if filename is specified)
-#' 
-#' @return An object with the same class as \code{x}
-#' @author Babak Naimi \email{naimi.b@@gmail.com}
-#' 
-#' @examples 
-#' categorize(1:10,3)
-#' file <- system.file('external/dem_example.grd',package='elsa')
-#' r <- raster(file)
-#' plot(r,main='a continuous raster layer')
-#' rc <- categorize(r,nc=4)
-#' plot(rc, main=') 
 
 
-
-                        
 if (!isGeneric("categorize")) {
-  setGeneric("categorize", function(x, ...)
+  setGeneric("categorize", function(x,nc,...)
     standardGeneric("categorize"))
 }	
 
@@ -57,7 +32,7 @@ setMethod('categorize', signature(x='RasterLayer'),
               if (filename != '') out <- writeRaster(out, filename, ...)
             } else {
               out <- writeStart(out, filename,...)
-              tr <- blockSize(out, minblocks=3, minrows=fdim)
+              tr <- blockSize(out, minblocks=3)
               pb <- pbCreate(tr$n, label='categorize',...)
               
               for (i in 1:tr$n) {

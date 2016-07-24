@@ -1,6 +1,9 @@
-import(sp)
-import(methods)
-import(raster)
+import(sp, methods)
+importFrom("graphics", "points")
+importFrom("stats", "cor")
+importFrom("raster",  "raster", "brick","cellStats","ncell","trim","writeStart","blockSize","pbCreate",
+           "getValues","writeValues","pbStep","writeStop","pbClose","res","canProcessInMemory","sampleRandom",
+           "writeRaster","calc","xmin","xmax","ymin","ymax","unique")
 exportClasses(Entrogram, neighbours)
 exportMethods(elsa,dneigh,categorize,entrogram,nclass,dif2list,elsa.test)
 useDynLib(elsa)

@@ -1,9 +1,9 @@
 \name{elsa}
 
 \alias{elsa}
-\alias{elsa,Raster,missing-method}
-\alias{elsa,Raster,SpatialPoints-method}
-\alias{lisa,Raster,SpatialPointsDataFrame-method}
+\alias{elsa,SpatialPointsDataFrame-method}
+\alias{elsa,RasterLayer-method}
+
 
 \title{Entropy-based Local indicators of Spatial Sssociation}
 
@@ -44,7 +44,18 @@ Naimi. B. et al. (under review) ELSA: An Entropy-based Local indicators of Spati
 
 
 \examples{
-#
+\dontrun{
+
+file <- system.file('external/dem_example.grd',package='elsa')
+r <- raster(file)
+
+plot(r,main='a continuous raster map')
+
+e <- elsa(r,d=2000,categorical=FALSE)
+
+plot(et)
+
+}
 }
 
 \keyword{spatial}

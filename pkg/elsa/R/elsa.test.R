@@ -1,6 +1,6 @@
 # Author: Babak Naimi, naimi.b@gmail.com
-# Date :  August 2014
-# Version 1.0
+# Date :  July 2016
+# Version 1.1
 # Licence GPL v3 
 
 if (!isGeneric("elsa.test")) {
@@ -13,6 +13,7 @@ setMethod('elsa.test', signature(x='RasterLayer'),
           function(x, d, n=99, nc, categorical, dif,cells,filename,...) {
             
             if (missing(filename)) filename <- ''
+            if (missing(n)) n <- 99
             
             if (!missing(nc)) {
               if (missing(categorical)) {
@@ -67,7 +68,7 @@ setMethod('elsa.test', signature(x='RasterLayer'),
               for (i in 1:n) {
                 #o1 <- calc(x,function(x) { x[!is.na(x)] <- sample(null.model,length(x[!is.na(x)]),replace=TRUE); x})
                 o1[nNA] <- sample(null.model,length(null.model),replace=TRUE)
-                e2 <- elsa(o1,d1=d1,d2=d2,nc=nc,categorical=categorical,dif=dif)
+                e2 <- elsa(o1,d=d,nc=nc,categorical=categorical,dif=dif)
                 ee <- e1 - e2
                 ee <- calc(ee,function(x) {x[x > 0] <- 1; x[x <= 0] = 0; x})
                 o2 <- o2 + ee
@@ -83,7 +84,7 @@ setMethod('elsa.test', signature(x='RasterLayer'),
               for (i in 1:n) {
                 o1[nNA] <- sample(null.model,length(null.model),replace=TRUE)
                 #o1 <- calc(x,function(x) { x[!is.na(x)] <- sample(classes,length(x[!is.na(x)]),replace=TRUE); x})
-                e2 <- elsa(o1,d1=d1,d2=d2,nc=nc,categorical=categorical,dif=dif,cells=cells)
+                e2 <- elsa(o1,d=d,nc=nc,categorical=categorical,dif=dif,cells=cells)
                 ee <- e1 - e2
                 ee <- ifelse(ee > 0,1,0)
                 o2 <- o2 + ee

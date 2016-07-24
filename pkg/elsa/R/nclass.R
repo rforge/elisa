@@ -1,17 +1,18 @@
 # Author: Babak Naimi, naimi.b@gmail.com
-# Date :  August 2014
-# Version 1.0
+# Date :  July 2016
+# Version 1.1
 # Licence GPL v3 
 
 
 if (!isGeneric("nclass")) {
-  setGeneric("nclass", function(x,...)
+  setGeneric("nclass", function(x,th)
     standardGeneric("nclass"))
 }
 
 
 setMethod('nclass', signature(x='RasterLayer'), 
-          function(x,th=0.005) {
+          function(x,th=0.01) {
+            if (missing(th)) th <- 0.01
             if (canProcessInMemory(x,2)) {
               w <- which(!is.na(x[]))
               if (length(w) > 10000 & length(w) < 20000) w <- w[sample(1:length(w),length(w)*0.3)]
@@ -44,7 +45,8 @@ setMethod('nclass', signature(x='RasterLayer'),
 #------------
 
 setMethod('nclass', signature(x='numeric'), 
-          function(x,th=0.005) {
+          function(x,th=0.01) {
+            if (missing(th)) th <- 0.01
             x <- x[which(!is.na(x))]
             Loop <- TRUE
             i <-  2

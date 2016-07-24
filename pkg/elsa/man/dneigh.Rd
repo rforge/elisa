@@ -2,6 +2,7 @@
 
 \alias{dneigh}
 \alias{dneigh,SpatialPoints,numeric-method}
+\alias{dneigh,SpatialPolygons,numeric-method}
 \alias{dneigh,data.frameORmatrix,numeric-method}
 
 

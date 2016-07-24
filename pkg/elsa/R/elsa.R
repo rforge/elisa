@@ -1,6 +1,6 @@
 # Author: Babak Naimi, naimi.b@gmail.com
 # Date :  July 2016
-# Version 1.2
+# Version 1.3
 # Licence GPL v3 
 
 
@@ -11,7 +11,7 @@
   eg[1]<- -eg[1]
   eg[3]<- sqrt(eg[1]^2+eg[2]^2)
   ndim<- c*2+1
-  m<-matrix(eg[,3],nc=ndim,nr=ndim)*r
+  m<-matrix(eg[,3],ncol=ndim,nrow=ndim)*r
   mw<- which(m > d1 & m <= d2)
   m[mw] = 1 
   m[-mw] = NA
@@ -19,7 +19,7 @@
   m[mw]<- 1
   
   w <- ncol(m)
-  mr <- matrix(nc=w,nr=w) 
+  mr <- matrix(ncol=w,nrow=w) 
   tr <- trunc(w/2)
   
   for (i in 1:w) {
@@ -164,7 +164,7 @@ setMethod('elsa', signature(x='RasterLayer'),
               
               if (missing(cells)) {
                 out <- writeStart(out, filename)
-                v <- getValues(x, row=1, nrows=tr$nrows[1]+addr)
+                v <- as.integer(getValues(x, row=1, nrows=tr$nrows[1]+addr))
                 if (!categorical) {
                   v <- .Call('elsa', v, as.integer(ncl), as.integer(nrw), as.integer(nc), as.integer(w[,1]), as.integer(w[,2]))
                 } else {
@@ -174,11 +174,11 @@ setMethod('elsa', signature(x='RasterLayer'),
                 out <- writeValues(out, v[1:ex], 1)
                 
                 for (i in 2:(tr$n-1)) {
-                  v <- getValues(x, row=tr$row[i]-addr, nrows=tr$nrows[i]+(2*addr))
+                  v <- as.integer(getValues(x, row=tr$row[i]-addr, nrows=tr$nrows[i]+(2*addr)))
                   if (!categorical) {
-                    v <- .Call('elsa', as.integer(v), as.integer(ncl), as.integer(nrw), as.integer(nc), as.integer(w[,1]), as.integer(w[,2]))
+                    v <- .Call('elsa', v, as.integer(ncl), as.integer(nrw), as.integer(nc), as.integer(w[,1]), as.integer(w[,2]))
                   } else {
-                    v <- .Call('elsac', as.integer(v), as.integer(ncl), as.integer(nrw), as.integer(nc), as.integer(w[,1]), as.integer(w[,2]),as.integer(classes),dif)
+                    v <- .Call('elsac', v, as.integer(ncl), as.integer(nrw), as.integer(nc), as.integer(w[,1]), as.integer(w[,2]),as.integer(classes),dif)
                   }
                   st <- (addr * ncl)+1
                   ex <- length(v) - (addr * ncl)
@@ -187,11 +187,11 @@ setMethod('elsa', signature(x='RasterLayer'),
                 }
                 
                 i <- tr$n
-                v <- getValues(x, row=tr$row[i]-addr, nrows=tr$nrows[i]+addr)
+                v <- as.integer(getValues(x, row=tr$row[i]-addr, nrows=tr$nrows[i]+addr))
                 if (!categorical) {
-                  v <- .Call('elsa', as.integer(v), as.integer(ncl), as.integer(nrw), as.integer(nc), as.integer(w[,1]), as.integer(w[,2]))
+                  v <- .Call('elsa', v, as.integer(ncl), as.integer(nrw), as.integer(nc), as.integer(w[,1]), as.integer(w[,2]))
                 } else {
-                  v <- .Call('elsac', as.integer(v), as.integer(ncl), as.integer(nrw), as.integer(nc), as.integer(w[,1]), as.integer(w[,2]),as.integer(classes),dif)
+                  v <- .Call('elsac', v, as.integer(ncl), as.integer(nrw), as.integer(nc), as.integer(w[,1]), as.integer(w[,2]),as.integer(classes),dif)
                 }
                 st <- (addr * nc)+1
                 ex <- length(v)
@@ -200,13 +200,13 @@ setMethod('elsa', signature(x='RasterLayer'),
                 out <- writeStop(out)      
                 pbClose(pb)  
               } else {
-                v <- getValues(x, row=1, nrows=tr$nrows[1]+addr)
+                v <- as.integer(getValues(x, row=1, nrows=tr$nrows[1]+addr))
                 cls <- cells[which(cells <= (tr$nrows[1]) * ncl)]
                 if (length(cls) > 0) {
                   if (!categorical) {
-                    v <- .Call('elsa_cell', as.integer(v), as.integer(ncl), as.integer(nrw), as.integer(nc), as.integer(w[,1]), as.integer(w[,2]), as.integer(cls))
+                    v <- .Call('elsa_cell', v, as.integer(ncl), as.integer(nrw), as.integer(nc), as.integer(w[,1]), as.integer(w[,2]), as.integer(cls))
                   } else {
-                    v <- .Call('elsac_cell', as.integer(v), as.integer(ncl), as.integer(nrw), as.integer(nc), as.integer(w[,1]), as.integer(w[,2]),as.integer(classes),dif, as.integer(cls))
+                    v <- .Call('elsac_cell', v, as.integer(ncl), as.integer(nrw), as.integer(nc), as.integer(w[,1]), as.integer(w[,2]),as.integer(classes),dif, as.integer(cls))
                   }
                   out <- c(out, v)
                 }
@@ -215,11 +215,11 @@ setMethod('elsa', signature(x='RasterLayer'),
                   cls <- cells[which(cells > ((tr$nrow[i] - 1) * ncl) & cells <= ((tr$nrows[i]+ tr$nrows[i] - 1) * ncl))]
                   if (length(cls) > 0) {
                     cls <- cls - ((tr$row[i]-addr-1)*ncl)
-                    v <- getValues(x, row=tr$row[i]-addr, nrows=tr$nrows[i]+(2*addr))
+                    v <- as.integer(getValues(x, row=tr$row[i]-addr, nrows=tr$nrows[i]+(2*addr)))
                     if (!categorical) {
-                      v <- .Call('elsa_cell', as.integer(v), as.integer(ncl), as.integer(nrw), as.integer(nc), as.integer(w[,1]), as.integer(w[,2]), as.integer(cls))
+                      v <- .Call('elsa_cell', v, as.integer(ncl), as.integer(nrw), as.integer(nc), as.integer(w[,1]), as.integer(w[,2]), as.integer(cls))
                     } else {
-                      v <- .Call('elsac_cell', as.integer(v), as.integer(ncl), as.integer(nrw), as.integer(nc), as.integer(w[,1]), as.integer(w[,2]),as.integer(classes),dif, as.integer(cls))
+                      v <- .Call('elsac_cell', v, as.integer(ncl), as.integer(nrw), as.integer(nc), as.integer(w[,1]), as.integer(w[,2]),as.integer(classes),dif, as.integer(cls))
                     }
                     out <- c(out, v)
                     pbStep(pb)
@@ -230,11 +230,11 @@ setMethod('elsa', signature(x='RasterLayer'),
                 cls <- cells[which(cells > ((tr$nrow[i] - 1) * ncl) & cells <= ((tr$nrows[i]+ tr$nrows[i] - 1) * ncl))]
                 cls <- cls - ((tr$row[i]-addr-1)*ncl)
                 if (length(cls) > 0) {
-                  v <- getValues(x, row=tr$row[i]-addr, nrows=tr$nrows[i]+addr)
+                  v <- as.integer(getValues(x, row=tr$row[i]-addr, nrows=tr$nrows[i]+addr))
                   if (!categorical) {
-                    v <- .Call('elsa_cell', as.integer(v), as.integer(ncl), as.integer(nrw), as.integer(nc), as.integer(w[,1]), as.integer(w[,2]), as.integer(cls))
+                    v <- .Call('elsa_cell', v, as.integer(ncl), as.integer(nrw), as.integer(nc), as.integer(w[,1]), as.integer(w[,2]), as.integer(cls))
                   } else {
-                    v <- .Call('elsac_cell', as.integer(v), as.integer(ncl), as.integer(nrw), as.integer(nc), as.integer(w[,1]), as.integer(w[,2]),as.integer(classes),dif, as.integer(cls))
+                    v <- .Call('elsac_cell', v, as.integer(ncl), as.integer(nrw), as.integer(nc), as.integer(w[,1]), as.integer(w[,2]),as.integer(classes),dif, as.integer(cls))
                   }
                   out <- c(out, v)
                   pbStep(pb)

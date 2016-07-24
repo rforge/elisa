@@ -19,8 +19,8 @@ SEXP elsac(SEXP v, SEXP nc, SEXP nr, SEXP nclass, SEXP rr, SEXP cc, SEXP classes
   
   SEXP ans;
   
-  double *xans, *xv, *xdif;
-  int *xrr, *xcc, *xcls;
+  double *xans, *xdif;
+  int *xv, *xrr, *xcc, *xcls;
   
   nrow=INTEGER(nr)[0];
   ncol=INTEGER(nc)[0];
@@ -29,7 +29,7 @@ SEXP elsac(SEXP v, SEXP nc, SEXP nr, SEXP nclass, SEXP rr, SEXP cc, SEXP classes
   n=length(v);
   
   
-  PROTECT(v = coerceVector(v, REALSXP));
+  PROTECT(v = coerceVector(v, INTSXP));
   ++nProtected;
   
   PROTECT(ans = allocVector(REALSXP, n));
@@ -50,7 +50,7 @@ SEXP elsac(SEXP v, SEXP nc, SEXP nr, SEXP nclass, SEXP rr, SEXP cc, SEXP classes
   ngb=length(rr);
   
   xans=REAL(ans);
-  xv=REAL(v);
+  xv=INTEGER(v);
   xrr=INTEGER(rr);
   xcc=INTEGER(cc);
   xcls=INTEGER(classes);
@@ -67,7 +67,7 @@ SEXP elsac(SEXP v, SEXP nc, SEXP nr, SEXP nclass, SEXP rr, SEXP cc, SEXP classes
       row = (c / ncol) + 1;
       col = (c + 1) - ((row - 1) * ncol);
       
-      double xn[ngb], xw[ngb];
+      int xn[ngb], xw[ngb];
       //------
       for (i=0; i < ncl;i++) {
         if (xcls[i] == xi) {
@@ -161,8 +161,8 @@ SEXP elsac_cell(SEXP v, SEXP nc, SEXP nr, SEXP nclass, SEXP rr, SEXP cc, SEXP cl
   
   SEXP ans;
   
-  double *xans, *xv, *xdif;
-  int *xrr, *xcc, *xcls, *xcells;
+  double *xans, *xdif;
+  int *xrr, *xcc, *xcls, *xcells, *xv;
   
   nrow=INTEGER(nr)[0];
   ncol=INTEGER(nc)[0];
@@ -171,7 +171,7 @@ SEXP elsac_cell(SEXP v, SEXP nc, SEXP nr, SEXP nclass, SEXP rr, SEXP cc, SEXP cl
   n=length(cells);
   
   
-  PROTECT(v = coerceVector(v, REALSXP));
+  PROTECT(v = coerceVector(v, INTSXP));
   ++nProtected;
   
   PROTECT(ans = allocVector(REALSXP, n));
@@ -195,7 +195,7 @@ SEXP elsac_cell(SEXP v, SEXP nc, SEXP nr, SEXP nclass, SEXP rr, SEXP cc, SEXP cl
   ngb=length(rr);
   
   xans=REAL(ans);
-  xv=REAL(v);
+  xv=INTEGER(v);
   xrr=INTEGER(rr);
   xcc=INTEGER(cc);
   xcls=INTEGER(classes);
@@ -214,7 +214,7 @@ SEXP elsac_cell(SEXP v, SEXP nc, SEXP nr, SEXP nclass, SEXP rr, SEXP cc, SEXP cl
       row = (cn / ncol) + 1;
       col = (cn + 1) - ((row - 1) * ncol);
       
-      double xn[ngb], xw[ngb];
+      int xn[ngb], xw[ngb];
       //------
       for (i=0; i < ncl;i++) {
         if (xcls[i] == xi) {

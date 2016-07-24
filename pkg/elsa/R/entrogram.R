@@ -1,6 +1,6 @@
 # Author: Babak Naimi, naimi.b@gmail.com
-# Date :  August 2014
-# Version 1.0
+# Date :  July 2016
+# Version 1.1
 # Licence GPL v3 
 
 .checkrasterMemory <- function(cells,n=1) {
@@ -98,14 +98,14 @@ setMethod('entrogram', signature(x='RasterLayer'),
             if (cloud) {
               out@entrogramCloud <- matrix(NA,nrow=length(s),ncol=nlag)
               for (i in 1:nlag) {
-                out@entrogramCloud[,i] <- elsa(x,d1=0,d2=i*width,nc=nc,categorical=categorical,dif=dif,cells=s)
+                out@entrogramCloud[,i] <- elsa(x,d=i*width,nc=nc,categorical=categorical,dif=dif,cells=s)
               }
               out@entrogram <- data.frame(distance=seq(width,width*nlag,width) - (width/2),E=apply(out@entrogramCloud,2,mean,na.rm=TRUE))
             } else {
               d <- seq(width,width*nlag,width) - (width/2)
               out@entrogram <- data.frame(distance=d,E=rep(NA,length(d)))
               for (i in 1:nlag) {
-                out@entrogram [i,2] <- mean(elsa(x,d1=0,d2=i*width,nc=nc,categorical=categorical,dif=dif,cells=s),na.rm=TRUE)
+                out@entrogram [i,2] <- mean(elsa(x,d=i*width,nc=nc,categorical=categorical,dif=dif,cells=s),na.rm=TRUE)
               }
             }
             out

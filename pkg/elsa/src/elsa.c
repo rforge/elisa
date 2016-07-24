@@ -27,7 +27,7 @@ SEXP elsa(SEXP v, SEXP nc, SEXP nr, SEXP nclass, SEXP rr, SEXP cc) {
   
   n=length(v);
   
-  PROTECT(v = coerceVector(v, REALSXP));
+  PROTECT(v = coerceVector(v, INTSXP));
   ++nProtected;
   
   PROTECT(ans = allocVector(REALSXP, n));

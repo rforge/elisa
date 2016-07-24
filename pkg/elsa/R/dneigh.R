@@ -31,7 +31,7 @@
   return(sort(result))
 }
 
-.dnn.poly <- function(x,queen=TRUE) {
+.dnn.poly <- function(x,d,queen=TRUE) {
   n <- length(slot(x, "polygons"))
   if (n < 1) stop("non-positive number of entities")
   regid <- row.names(x)
