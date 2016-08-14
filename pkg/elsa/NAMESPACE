@@ -1,10 +1,11 @@
 import(sp, methods)
-importFrom("graphics", "points")
-importFrom("stats", "cor")
+importFrom("graphics", "points","boxplot")
+importFrom("stats", "cor","quantile")
 importFrom("raster",  "raster", "brick","cellStats","ncell","trim","writeStart","blockSize","pbCreate",
            "getValues","writeValues","pbStep","writeStop","pbClose","res","canProcessInMemory","sampleRandom",
-           "writeRaster","calc","xmin","xmax","ymin","ymax","unique")
+           "writeRaster","calc","xmin","xmax","ymin","ymax","unique","compareRaster","setValues")
 exportClasses(Entrogram, neighbours)
-exportMethods(elsa,dneigh,categorize,entrogram,nclass,dif2list,elsa.test)
+exportMethods(elsa,dneigh,categorize,entrogram,nclass,dif2list,elsa.test,Variogram,lisa,moran, 
+              geary,correlogram)
 useDynLib(elsa)
 exportPattern("^[[:alpha:]]+")

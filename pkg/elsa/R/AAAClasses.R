@@ -1,6 +1,6 @@
 # Author: Babak Naimi, naimi.b@gmail.com
-# Date :  August 2014
-# Version 1.0
+# Date :  July 2016
+# Version 1.1
 # Licence GPL v3 
 
 setClassUnion('data.frameORmatrix',c("data.frame","matrix"))
@@ -15,6 +15,21 @@ setClass("Entrogram",
          prototype(
            entrogramCloud=NULL
            )
+)
+#-------
+
+setClass("Variogram",
+         representation(width="numeric",
+                        cutoff="numeric",
+                        variogramCloud="matrix",
+                        variogram="data.frame")
+)
+#-------
+
+setClass("Correlogram",
+         representation(width="numeric",
+                        cutoff="numeric",
+                        correlogram="data.frame")
 )
 #-------
 setClass("neighbours",

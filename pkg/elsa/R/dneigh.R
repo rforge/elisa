@@ -1,6 +1,6 @@
 # Author: Babak Naimi, naimi.b@gmail.com
-# Date :  August 2014
-# Version 1.0
+# Date :  July 2016
+# Version 1.1
 # Licence GPL v3 
 
 # based on the functions poly2nb and dnearneigh in spdep package (Roger Bivand):
@@ -73,8 +73,8 @@
   ans
 }
 #------
-.dnn.xy <- function(x,d,longlat) {
-  .Call("dnn", x[,1], x[,2], d, as.integer(longlat), PACKAGE = "elsa")
+.dnn.xy <- function(x,d1,d2,longlat) {
+  .Call("dnn", x[,1], x[,2], d1, d2, as.integer(longlat), PACKAGE = "elsa")
 }
 
 ######################################
@@ -92,30 +92,43 @@
 
 
 if (!isGeneric("dneigh")) {
-  setGeneric("dneigh", function(x, d,longlat,method,...)
+  setGeneric("dneigh", function(x, d1, d2, longlat,method,...)
     standardGeneric("dneigh"))
 }
 
 
 
-setMethod('dneigh', signature(x='SpatialPoints',d='numeric'), 
-          function(x, d, longlat,...) {
+setMethod('dneigh', signature(x='SpatialPoints'), 
+          function(x, d1, d2, longlat,...) {
             if (missing(longlat) || is.null(longlat) || !is.logical(longlat)) longlat <- .is.projected(x)
+            
+            if (missing(d1) || is.null(d1) || !is.numeric(d1)) d1 <- 0
+            
+            if (missing(d2)) stop('d2 should be provided')
+            
+            if (d2 <= d1) stop('d2 should be greater than d1')
+            
             x <- coordinates(x)
             if (nrow(x) < 1) stop("no records in x")
             if (ncol(x) > 2) stop("Only 2D data accepted")
-            z <- .dnn.xy(x,d,longlat)
+            z <- .dnn.xy(x,d1,d2,longlat)
             if (all(sapply(z,is.null))) stop('There is no links within the specified distance!')
-            z <- new('neighbours',distance1=0,distance2=d,neighbours=z)
+            z <- new('neighbours',distance1=d1,distance2=d2,neighbours=z)
             return(z)
           }
 )
 
 
 
-setMethod('dneigh', signature(x='SpatialPolygons',d='numeric'), 
-          function(x, d, longlat,method,...) {
+setMethod('dneigh', signature(x='SpatialPolygons'), 
+          function(x, d1, d2, longlat,method,...) {
             if (missing(longlat) || is.null(longlat) || !is.logical(longlat)) longlat <- .is.projected(x)
+            
+            if (missing(d1) || is.null(d1) || !is.numeric(d1)) d1 <- 0
+            
+            if (missing(d2)) stop('d2 should be provided')
+            
+            if (d2 <= d1) stop('d2 should be greater than d1')
             
             if (missing(method) || is.null(method)) method <- 'centroid'
             else {
@@ -131,26 +144,33 @@ setMethod('dneigh', signature(x='SpatialPolygons',d='numeric'),
               dot <- list(...)
               if ('queen' %in% names(dot) && is.logical(dot[['queen']])) queen <- dot[['queen']]
               else queen <- TRUE
-              z <- .dnn.poly(x,d=d,queen=queen)
+              if (d1 > 0) warning('with method="bound", d1 should be 0. So, it is changed to 0!')
+              d1 <- 0
+              z <- .dnn.poly(x,d=d2,queen=queen)
               attributes(z) <- NULL
             } else {
               x <- coordinates(x)
               if (nrow(x) < 1) stop("no records in x")
-              z <- .dnn.xy(x,d,longlat)
+              z <- .dnn.xy(x,d1,d2,longlat)
             }
             if (all(sapply(z,is.null))) stop('There is no links within the specified distance!')
-            z <- new('neighbours',distance1=0,distance2=d,neighbours=z)
+            z <- new('neighbours',distance1=d1,distance2=d2,neighbours=z)
             return(z)
           }
 )
 
-setMethod('dneigh', signature(x='data.frameORmatrix',d='numeric'), 
-          function(x, d, longlat,...) {
+setMethod('dneigh', signature(x='data.frameORmatrix'), 
+          function(x, d1, d2, longlat,...) {
             if (nrow(x) < 1) stop("no records in x")
             if (missing(longlat) || is.null(longlat) || !is.logical(longlat)) longlat <- .is.projected(x)
-            z <- .dnn.xy(as.matrix(x),d,longlat)
+            if (missing(d1) || is.null(d1) || !is.numeric(d1)) d1 <- 0
+            
+            if (missing(d2)) stop('d2 should be provided')
+            
+            if (d2 <= d1) stop('d2 should be greater than d1')
+            z <- .dnn.xy(as.matrix(x),d1,d2,longlat)
             if (all(sapply(z,is.null))) stop('There is no links within the specified distance!')
-            z <- new('neighbours',distance1=0,distance2=d,neighbours=z)
+            z <- new('neighbours',distance1=d1,distance2=d2,neighbours=z)
             return(z)
           }
 )

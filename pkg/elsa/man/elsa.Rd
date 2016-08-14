@@ -6,7 +6,7 @@
 \alias{elsa,RasterLayer-method}
 
 
-\title{Entropy-based Local indicators of Spatial Sssociation}
+\title{Entropy-based Local indicators of Spatial Association}
 
 \description{
 Calculate ELSA indicator for either a categorical or continuous spatial dataset.
@@ -17,8 +17,8 @@ elsa(x,d,nc,categorical,dif,...)
 }
 
 \arguments{
-  \item{x}{ a raster object (\code{RasterLayer}}
-  \item{d}{ local distance  }
+  \item{x}{ a raster object (\code{RasterLayer} or \code{SpatialPointsDataFrame} or \code{SpatialPolygonsDataFrame}}
+  \item{d}{ numeric local distance, or an object of class neighbours created by dneigh when x is SpatialPoints or SpatialPolygons}
   \item{nc}{ optional, for continuous data it specifies the number of classes through categorizing the variable. If missed, it is automatically calculated (recommended)  }
   \item{categorical}{ logical, specified whether x is a continuous or categorical. If missed the function tries to detect it}
   \item{dif}{the difference between categories, only for categorical }
@@ -54,7 +54,7 @@ plot(r,main='a continuous raster map')
 
 e <- elsa(r,d=2000,categorical=FALSE)
 
-plot(et)
+plot(e)
 
 }
 }

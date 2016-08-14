@@ -1,6 +1,6 @@
 # Author: Babak Naimi, naimi.b@gmail.com
-# Date :  July 2016
-# Version 1.3
+# Date :  August 2016
+# Version 2.0
 # Licence GPL v3 
 
 
@@ -85,7 +85,21 @@ if (!isGeneric("elsa")) {
 
 
 setMethod('elsa', signature(x='RasterLayer'), 
-          function(x,d,nc,categorical,dif,cells,filename,...) {
+          function(x,d,nc,categorical,dif,cells,filename,stat,...) {
+            
+            if (missing(stat) || is.null(stat)) stat <- 'e'
+            else {
+              stat <- tolower(stat)
+              if (length(stat) == 1) {
+                if (!stat %in% c('e','l','r')) {
+                  stat <- 'e'
+                  warning('stat should be either of "E", "L", "R"; the default "E" is considered!')
+                }
+              } else {
+                if (!all(tolower(stat) %in% c('e','l','r'))) stop('stat should be selected from "E", "L", "R"')
+              }
+            }
+            
             if (missing(d)) d <- res(x)[1]
             if (missing(filename)) filename=''
             if (!missing(nc)) {
@@ -144,17 +158,133 @@ setMethod('elsa', signature(x='RasterLayer'),
             if (canProcessInMemory(out)) {
               if (categorical) {
                 if (missing(cells)) {
-                  out[] <- .Call('elsac', as.integer(x[]), as.integer(ncl), as.integer(nrw), as.integer(nc), as.integer(w[,1]), as.integer(w[,2]),as.integer(classes),dif)
+                  if (stat == 'e') {
+                    out[] <- .Call('v_elsac', x[], as.integer(ncl), as.integer(nrw), as.integer(nc), as.integer(w[,1]), as.integer(w[,2]),as.integer(classes),dif, PACKAGE='elsa')
+                    names(out) <- 'ELSA'
+                  } else {
+                  xx <- .Call('elsac', x[], as.integer(ncl), as.integer(nrw), as.integer(nc), as.integer(w[,1]), as.integer(w[,2]),as.integer(classes),dif, PACKAGE='elsa')
+                  if (length(stat) > 1) {
+                    nnn <- c()
+                    if ('l' %in% stat) {
+                      outx <- raster(out)
+                      outx[] <- xx[[2]]
+                      out <- addLayer(out,outx)
+                      nnn <- c(nnn,'L')
+                    }
+                    if ('r' %in% stat) {
+                      outx <- raster(out)
+                      outx[] <- xx[[1]]
+                      out <- addLayer(out,outx)
+                      nnn <- c(nnn,'R')
+                    }
+                    if ('e' %in% stat) {
+                      outx <- raster(out)
+                      outx[] <- xx[[2]] * xx[[1]]
+                      out <- addLayer(out,outx)
+                      nnn <- c(nnn,'ELSA')
+                    }
+                    names(out) <- nnn
+                    
+                  } else {
+                    if (stat == 'l') {
+                      out[] <- xx[[2]]
+                      names(out) <- 'L'
+                    } else {
+                      out[] <- xx[[1]]
+                      names(out) <- 'R'
+                    }
+                   }
+                  }
                   if (filename != '') out <- writeRaster(out, filename, ...)
                 } else {
-                  out <- .Call('elsac_cell', as.integer(x[]), as.integer(ncl), as.integer(nrw), as.integer(nc), as.integer(w[,1]), as.integer(w[,2]),as.integer(classes),dif, as.integer(cells))
+                  if (stat == 'e') out <- .Call('v_elsac_cell', x[], as.integer(ncl), as.integer(nrw), as.integer(nc), as.integer(w[,1]), as.integer(w[,2]),as.integer(classes),dif, as.integer(cells), PACKAGE='elsa')
+                  else {
+                    xx <- .Call('elsac_cell', x[], as.integer(ncl), as.integer(nrw), as.integer(nc), as.integer(w[,1]), as.integer(w[,2]),as.integer(classes),dif, as.integer(cells), PACKAGE='elsa')
+                    if (length(stat) > 1) {
+                      out <- list()
+                      if ('l' %in% stat) {
+                        out[['L']] <- xx[[2]]
+                      }
+                      if ('r' %in% stat) {
+                        out[['R']] <- xx[[2]]
+                      }
+                      if ('e' %in% stat) {
+                        out[['ELSA']] <-  xx[[2]] * xx[[1]]
+                      }
+                    } else {
+                      if (stat == 'l') {
+                        out <- xx[[2]]
+                      } else {
+                        out <- xx[[1]]
+                      }
+                    }
+                  }
                 }
               } else {
                 if (missing(cells)) {
-                  out[] <- .Call('elsa', as.integer(x[]), as.integer(ncl), as.integer(nrw), as.integer(nc), as.integer(w[,1]), as.integer(w[,2]))
+                  
+                  if (stat == 'e') {
+                    out[] <- .Call('v_elsa', x[], as.integer(ncl), as.integer(nrw), as.integer(nc), as.integer(w[,1]), as.integer(w[,2]), PACKAGE='elsa')
+                    names(out) <- 'ELSA'
+                  } else {
+                    xx <- .Call('elsa', x[], as.integer(ncl), as.integer(nrw), as.integer(nc), as.integer(w[,1]), as.integer(w[,2]), PACKAGE='elsa')
+                    if (length(stat) > 1) {
+                      nnn <- c()
+                      if ('l' %in% stat) {
+                        outx <- raster(out)
+                        outx[] <- xx[[2]]
+                        out <- addLayer(out,outx)
+                        nnn <- c(nnn,'L')
+                      }
+                      if ('r' %in% stat) {
+                        outx <- raster(out)
+                        outx[] <- xx[[1]]
+                        out <- addLayer(out,outx)
+                        nnn <- c(nnn,'R')
+                      }
+                      if ('e' %in% stat) {
+                        outx <- raster(out)
+                        outx[] <- xx[[2]] * xx[[1]]
+                        out <- addLayer(out,outx)
+                        nnn <- c(nnn,'ELSA')
+                      }
+                      names(out) <- nnn
+                      
+                    } else {
+                      if (stat == 'l') {
+                        out[] <- xx[[2]]
+                        names(out) <- 'L'
+                      } else {
+                        out[] <- xx[[1]]
+                        names(out) <- 'R'
+                      }
+                    }
+                  }
                   if (filename != '') out <- writeRaster(out, filename, ...)
+                  
                 } else {
-                  out <- .Call('elsa_cell', as.integer(x[]), as.integer(ncl), as.integer(nrw), as.integer(nc), as.integer(w[,1]), as.integer(w[,2]),as.integer(cells))
+                  if (stat == 'e') out <- .Call('v_elsa_cell', x[], as.integer(ncl), as.integer(nrw), as.integer(nc), as.integer(w[,1]), as.integer(w[,2]),as.integer(cells), PACKAGE='elsa')
+                  else {
+                    xx <- .Call('elsa_cell', x[], as.integer(ncl), as.integer(nrw), as.integer(nc), as.integer(w[,1]), as.integer(w[,2]),as.integer(cells), PACKAGE='elsa')
+                    if (length(stat) > 1) {
+                      out <- list()
+                      if ('l' %in% stat) {
+                        out[['L']] <- xx[[2]]
+                      }
+                      if ('r' %in% stat) {
+                        out[['R']] <- xx[[1]]
+                      }
+                      if ('e' %in% stat) {
+                        out[['ELSA']] <-  xx[[2]] * xx[[1]]
+                      }
+                    } else {
+                      if (stat == 'l') {
+                        out <- xx[[2]]
+                      } else {
+                        out <- xx[[1]]
+                      }
+                    }
+                  }
                 }
               }
             } else {
@@ -162,24 +292,37 @@ setMethod('elsa', signature(x='RasterLayer'),
               pb <- pbCreate(tr$n, label='ELSA',...)
               addr <- floor(fdim / 2)
               
+              if (length(stat) > 1) warning(paste('for big rasters, stat can only have one value, so stat = "',toupper(stat[1]),'", is considered!',sep=''))
+              stat <- stat[1]
+              
               if (missing(cells)) {
                 out <- writeStart(out, filename)
-                v <- as.integer(getValues(x, row=1, nrows=tr$nrows[1]+addr))
+                v <- getValues(x, row=1, nrows=tr$nrows[1]+addr)
                 if (!categorical) {
-                  v <- .Call('elsa', v, as.integer(ncl), as.integer(nrw), as.integer(nc), as.integer(w[,1]), as.integer(w[,2]))
+                  v <- .Call('elsa', v, as.integer(ncl), as.integer(nrw), as.integer(nc), as.integer(w[,1]), as.integer(w[,2]), PACKAGE='elsa')
                 } else {
-                  v <- .Call('elsac', v, as.integer(ncl), as.integer(nrw), as.integer(nc), as.integer(w[,1]), as.integer(w[,2]),as.integer(classes),dif)
+                  v <- .Call('elsac', v, as.integer(ncl), as.integer(nrw), as.integer(nc), as.integer(w[,1]), as.integer(w[,2]),as.integer(classes),dif, PACKAGE='elsa')
                 }
+                
+                if (stat == 'e') v <- v[[1]] * v[[2]]
+                else if (stat == 'l') v <- v[[2]]
+                else v <- v[[1]]
+                
                 ex <- length(v) - (addr * ncl)
                 out <- writeValues(out, v[1:ex], 1)
                 
                 for (i in 2:(tr$n-1)) {
-                  v <- as.integer(getValues(x, row=tr$row[i]-addr, nrows=tr$nrows[i]+(2*addr)))
+                  v <- getValues(x, row=tr$row[i]-addr, nrows=tr$nrows[i]+(2*addr))
                   if (!categorical) {
-                    v <- .Call('elsa', v, as.integer(ncl), as.integer(nrw), as.integer(nc), as.integer(w[,1]), as.integer(w[,2]))
+                    v <- .Call('elsa', v, as.integer(ncl), as.integer(nrw), as.integer(nc), as.integer(w[,1]), as.integer(w[,2]), PACKAGE='elsa')
                   } else {
-                    v <- .Call('elsac', v, as.integer(ncl), as.integer(nrw), as.integer(nc), as.integer(w[,1]), as.integer(w[,2]),as.integer(classes),dif)
+                    v <- .Call('elsac', v, as.integer(ncl), as.integer(nrw), as.integer(nc), as.integer(w[,1]), as.integer(w[,2]),as.integer(classes),dif, PACKAGE='elsa')
                   }
+                  
+                  if (stat == 'e') v <- v[[1]] * v[[2]]
+                  else if (stat == 'l') v <- v[[2]]
+                  else v <- v[[1]]
+                  
                   st <- (addr * ncl)+1
                   ex <- length(v) - (addr * ncl)
                   out <- writeValues(out, v[st:ex], tr$row[i])
@@ -187,12 +330,17 @@ setMethod('elsa', signature(x='RasterLayer'),
                 }
                 
                 i <- tr$n
-                v <- as.integer(getValues(x, row=tr$row[i]-addr, nrows=tr$nrows[i]+addr))
+                v <- getValues(x, row=tr$row[i]-addr, nrows=tr$nrows[i]+addr)
                 if (!categorical) {
-                  v <- .Call('elsa', v, as.integer(ncl), as.integer(nrw), as.integer(nc), as.integer(w[,1]), as.integer(w[,2]))
+                  v <- .Call('elsa', v, as.integer(ncl), as.integer(nrw), as.integer(nc), as.integer(w[,1]), as.integer(w[,2]), PACKAGE='elsa')
                 } else {
-                  v <- .Call('elsac', v, as.integer(ncl), as.integer(nrw), as.integer(nc), as.integer(w[,1]), as.integer(w[,2]),as.integer(classes),dif)
+                  v <- .Call('elsac', v, as.integer(ncl), as.integer(nrw), as.integer(nc), as.integer(w[,1]), as.integer(w[,2]),as.integer(classes),dif, PACKAGE='elsa')
                 }
+                
+                if (stat == 'e') v <- v[[1]] * v[[2]]
+                else if (stat == 'l') v <- v[[2]]
+                else v <- v[[1]]
+                
                 st <- (addr * nc)+1
                 ex <- length(v)
                 out <- writeValues(out, v[st:ex], tr$row[i])
@@ -200,28 +348,63 @@ setMethod('elsa', signature(x='RasterLayer'),
                 out <- writeStop(out)      
                 pbClose(pb)  
               } else {
-                v <- as.integer(getValues(x, row=1, nrows=tr$nrows[1]+addr))
+                v <- getValues(x, row=1, nrows=tr$nrows[1]+addr)
                 cls <- cells[which(cells <= (tr$nrows[1]) * ncl)]
                 if (length(cls) > 0) {
                   if (!categorical) {
-                    v <- .Call('elsa_cell', v, as.integer(ncl), as.integer(nrw), as.integer(nc), as.integer(w[,1]), as.integer(w[,2]), as.integer(cls))
+                    v <- .Call('elsa_cell', v, as.integer(ncl), as.integer(nrw), as.integer(nc), as.integer(w[,1]), as.integer(w[,2]), as.integer(cls), PACKAGE='elsa')
                   } else {
-                    v <- .Call('elsac_cell', v, as.integer(ncl), as.integer(nrw), as.integer(nc), as.integer(w[,1]), as.integer(w[,2]),as.integer(classes),dif, as.integer(cls))
+                    v <- .Call('elsac_cell', v, as.integer(ncl), as.integer(nrw), as.integer(nc), as.integer(w[,1]), as.integer(w[,2]),as.integer(classes),dif, as.integer(cls), PACKAGE='elsa')
                   }
-                  out <- c(out, v)
+                  
+                  if (length(stat) > 1) {
+                    out <- list()
+                    if ('l' %in% stat) {
+                      out[['L']] <- c(out[['L']],v[[2]])
+                    }
+                    if ('r' %in% stat) {
+                      out[['R']] <- c(out[['R']],v[[1]])
+                    }
+                    if ('e' %in% stat) {
+                      out[['ELSA']] <-  c(out[['ELSA']],v[[2]] * v[[1]])
+                    }
+                  } else {
+                    out <- c()
+                    if (stat == 'l') {
+                      out <- c(out, v[[2]])
+                    } else if (stat == 'r') {
+                      out <- c(out, v[[1]])
+                    } else out <- c(out, v[[1]]*v[[2]])
+                  }
                 }
                 
                 for (i in 2:(tr$n-1)) {
                   cls <- cells[which(cells > ((tr$nrow[i] - 1) * ncl) & cells <= ((tr$nrows[i]+ tr$nrows[i] - 1) * ncl))]
                   if (length(cls) > 0) {
                     cls <- cls - ((tr$row[i]-addr-1)*ncl)
-                    v <- as.integer(getValues(x, row=tr$row[i]-addr, nrows=tr$nrows[i]+(2*addr)))
+                    v <- getValues(x, row=tr$row[i]-addr, nrows=tr$nrows[i]+(2*addr))
                     if (!categorical) {
-                      v <- .Call('elsa_cell', v, as.integer(ncl), as.integer(nrw), as.integer(nc), as.integer(w[,1]), as.integer(w[,2]), as.integer(cls))
+                      v <- .Call('elsa_cell', v, as.integer(ncl), as.integer(nrw), as.integer(nc), as.integer(w[,1]), as.integer(w[,2]), as.integer(cls), PACKAGE='elsa')
                     } else {
-                      v <- .Call('elsac_cell', v, as.integer(ncl), as.integer(nrw), as.integer(nc), as.integer(w[,1]), as.integer(w[,2]),as.integer(classes),dif, as.integer(cls))
+                      v <- .Call('elsac_cell', v, as.integer(ncl), as.integer(nrw), as.integer(nc), as.integer(w[,1]), as.integer(w[,2]),as.integer(classes),dif, as.integer(cls), PACKAGE='elsa')
                     }
-                    out <- c(out, v)
+                    if (length(stat) > 1) {
+                      if ('l' %in% stat) {
+                        out[['L']] <- c(out[['L']],v[[2]])
+                      }
+                      if ('r' %in% stat) {
+                        out[['R']] <- c(out[['R']],v[[1]])
+                      }
+                      if ('e' %in% stat) {
+                        out[['ELSA']] <-  c(out[['ELSA']],v[[2]] * v[[1]])
+                      }
+                    } else {
+                      if (stat == 'l') {
+                        out <- c(out, v[[2]])
+                      } else if (stat == 'r') {
+                        out <- c(out, v[[1]])
+                      } else out <- c(out, v[[1]]*v[[2]])
+                    }
                     pbStep(pb)
                   }
                 }
@@ -230,13 +413,29 @@ setMethod('elsa', signature(x='RasterLayer'),
                 cls <- cells[which(cells > ((tr$nrow[i] - 1) * ncl) & cells <= ((tr$nrows[i]+ tr$nrows[i] - 1) * ncl))]
                 cls <- cls - ((tr$row[i]-addr-1)*ncl)
                 if (length(cls) > 0) {
-                  v <- as.integer(getValues(x, row=tr$row[i]-addr, nrows=tr$nrows[i]+addr))
+                  v <- getValues(x, row=tr$row[i]-addr, nrows=tr$nrows[i]+addr)
                   if (!categorical) {
-                    v <- .Call('elsa_cell', v, as.integer(ncl), as.integer(nrw), as.integer(nc), as.integer(w[,1]), as.integer(w[,2]), as.integer(cls))
+                    v <- .Call('v_elsa_cell', v, as.integer(ncl), as.integer(nrw), as.integer(nc), as.integer(w[,1]), as.integer(w[,2]), as.integer(cls), PACKAGE='elsa')
                   } else {
-                    v <- .Call('elsac_cell', v, as.integer(ncl), as.integer(nrw), as.integer(nc), as.integer(w[,1]), as.integer(w[,2]),as.integer(classes),dif, as.integer(cls))
+                    v <- .Call('v_elsac_cell', v, as.integer(ncl), as.integer(nrw), as.integer(nc), as.integer(w[,1]), as.integer(w[,2]),as.integer(classes),dif, as.integer(cls), PACKAGE='elsa')
                   }
-                  out <- c(out, v)
+                  if (length(stat) > 1) {
+                    if ('l' %in% stat) {
+                      out[['L']] <- c(out[['L']],v[[2]])
+                    }
+                    if ('r' %in% stat) {
+                      out[['R']] <- c(out[['R']],v[[1]])
+                    }
+                    if ('e' %in% stat) {
+                      out[['ELSA']] <-  c(out[['ELSA']],v[[2]] * v[[1]])
+                    }
+                  } else {
+                    if (stat == 'l') {
+                      out <- c(out, v[[2]])
+                    } else if (stat == 'r') {
+                      out <- c(out, v[[1]])
+                    } else out <- c(out, v[[1]]*v[[2]])
+                  }
                   pbStep(pb)
                   pbClose(pb)  
                 }
@@ -247,96 +446,17 @@ setMethod('elsa', signature(x='RasterLayer'),
 )  
 
 #---------------
-# 
-# setMethod('elsa', signature(x='SpatialPointsDataFrame'), 
-#           function(x,d,nc,categorical,dif,zcol,...) {
-#             if (missing(d)) stop('d is missed!')
-#             if (missing(zcol)) {
-#               if (ncol(x@data) > 1) stop("zcol should be specified!")
-#               else zcol <- 1
-#             } else if (is.character(zcol)) {
-#               w <- which(colnames(x@data) == zcol[1])
-#               if (w != 1) stop('the specified variable in zcol does not exist in the data')
-#               zcol <- w
-#             } else if (is.numeric(zcol)) {
-#               zcol <- zcol[1]
-#               if (zcol > ncol(x@data)) stop('the zcol number is greater than the number of columns in data!')
-#             } else stop("zcol should be a character or a number!")
-#             
-#             xy <- coordinates(x)
-#             yy <- xy[,2]
-#             xx <- xy[,1]
-#             x <- x@data[,zcol]
-#             rm(xy)
-#             
-#             if (is.character(x) || is.factor(x)) {
-#               x <- as.character(x)
-#               if (!missing(categorical) && !categorical) warning("you specified a categorical variable, so categorical changed to TRUE!")
-#               categorical <- TRUE
-#             }
-#             
-#             if (!missing(nc)) {
-#               if (missing(categorical)) {
-#                 if (missing(dif)) categorical <- FALSE
-#                 else {
-#                   categorical <- TRUE
-#                   cat("input data is considered categorical, and nc is ignored!\n")
-#                 }
-#               } 
-#             } else {
-#               if (missing(categorical) && !missing(dif)) categorical <- TRUE
-#             }
-#             #----
-#             if (missing(categorical) || !is.logical(categorical)) {
-#               # guessing whether the layer is categorical:
-#               if (.is.categorical(x)) {
-#                 categorical <- TRUE
-#                 cat("the specified variable is considered as categorical...\n")
-#               } else {
-#                 categorical <- FALSE
-#                 cat("the specified variable is considered continuous...\n")
-#               }
-#             }
-#             #----
-#             if (!categorical && missing(nc)) {
-#               nc <- nclass(x)
-#             } else if (categorical) {
-#               classes <- unique(x)
-#               nc <- length(classes)
-#             }
-#             #-----
-#             
-#             if (categorical) {
-#               if (missing(dif)) {
-#                 dif <- rep(1,nc*nc)
-#                 for (i in 1:nc) dif[(i-1)*nc+i] <-0
-#               } else {
-#                 dif <- .checkDif(dif,classes)
-#               }
-#             }
-#             #-----
-#             
-#             if (!categorical) x <- categorize(x,nc)
-#             
-#             if (categorical) {
-#               
-#             } else {
-#               .Call('elsa_vector', as.integer(x), as.vector(xx), as.vector(yy), as.integer(nc), as.numeric(d))
-#             }
-#             
-#           }
-# )  
-
-
-
 
 setMethod('elsa', signature(x='SpatialPointsDataFrame'), 
-          function(x,d,nc,categorical,dif,zcol,...) {
+          function(x,d,nc,categorical,dif,zcol,drop,...) {
             if (missing(d)) stop('d is missed!')
             else if (!class(d) %in% c('numeric','integer','neighbours')) stop('d should be either a number (distance) or an object of class neighbours (created by dneigh function')
             
-            if (!inherits(d,'neighbours')) d <- dneigh(x, d[1])
+            if (!inherits(d,'neighbours')) d <- dneigh(x, 0, d[1])
             d <- d@neighbours
+            
+            if (missing(drop) || !is.logical(drop[1])) drop <- FALSE
+            else drop <- drop[1]
             
             if (missing(zcol)) {
               if (ncol(x@data) > 1) stop("zcol should be specified!")
@@ -350,6 +470,8 @@ setMethod('elsa', signature(x='SpatialPointsDataFrame'),
               if (zcol > ncol(x@data)) stop('the zcol number is greater than the number of columns in data!')
             } else stop("zcol should be a character or a number!")
             
+            xx <- x
+            
             x <- x@data[,zcol]
             
             if (is.character(x) || is.factor(x)) {
@@ -403,27 +525,38 @@ setMethod('elsa', signature(x='SpatialPointsDataFrame'),
             
             
             if (categorical) {
-              .Call('elsac_vector', as.integer(x), d, as.integer(nc), as.integer(classes),dif)
+              x <- .Call('elsac_vector', x, d, as.integer(nc), as.integer(classes),dif, PACKAGE='elsa')
             } else {
-              .Call('elsa_vector', as.integer(x), d, as.integer(nc))
+              x <- .Call('elsa_vector', x, d, as.integer(nc), PACKAGE='elsa')
             }
+            
+            xx@data$L <- x[[2]]
+            xx@data$R <- x[[1]]
+            xx@data$ELSA <- x[[1]] * x[[2]]
+            xx@data <- xx@data[,c('L','R','ELSA')]
+            
+            if (!drop) xx
+            else xx@data
             
           }
 )  
 
 
 setMethod('elsa', signature(x='SpatialPolygonsDataFrame'), 
-          function(x,d,nc,categorical,dif,zcol,method,...) {
+          function(x,d,nc,categorical,dif,zcol,method,drop,...) {
             if (missing(d)) stop('d is missed!')
             else if (!class(d) %in% c('numeric','integer','neighbours')) stop('d should be either a number (distance) or an object of class neighbours (created by dneigh function')
             
             if (missing(method)) method <- 'centroid'
             
-            if (!inherits(d,'neighbours')) d <- dneigh(x, d[1],method = method)
+            if (!inherits(d,'neighbours')) d <- dneigh(x, 0, d[1],method = method)
             d <- d@neighbours
+            if (missing(drop) || !is.logical(drop[1])) drop <- FALSE
+            else drop <- drop[1]
             
             
-              if (missing(zcol)) {
+            
+            if (missing(zcol)) {
               if (ncol(x@data) > 1) stop("zcol should be specified!")
               else zcol <- 1
             } else if (is.character(zcol)) {
@@ -435,6 +568,8 @@ setMethod('elsa', signature(x='SpatialPolygonsDataFrame'),
               if (zcol > ncol(x@data)) stop('the zcol number is greater than the number of columns in data!')
             } else stop("zcol should be a character or a number!")
             
+            xx <- x
+            
             x <- x@data[,zcol]
             
             if (is.character(x) || is.factor(x)) {
@@ -487,10 +622,18 @@ setMethod('elsa', signature(x='SpatialPolygonsDataFrame'),
             if (!categorical) x <- categorize(x,nc)
             
             if (categorical) {
-              .Call('elsac_vector', as.integer(x), d, as.integer(nc), as.integer(classes),dif)
+              x <- .Call('elsac_vector', as.integer(x), d, as.integer(nc), as.integer(classes),dif, PACKAGE='elsa')
             } else {
-              .Call('elsa_vector', as.integer(x), d, as.integer(nc))
+              x <-.Call('elsa_vector', as.integer(x), d, as.integer(nc), PACKAGE='elsa')
             }
+            
+            xx@data$L <- x[[2]]
+            xx@data$R <- x[[1]]
+            xx@data$ELSA <- x[[1]] * x[[2]]
+            xx@data <- xx@data[,c('L','R','ELSA')]
+            
+            if (!drop) xx
+            else xx@data
             
           }
 )  

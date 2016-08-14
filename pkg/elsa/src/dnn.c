@@ -239,11 +239,11 @@ SEXP poly_loop2(SEXP n, SEXP i_findInBox, SEXP bb, SEXP pl, SEXP nrs,
 
 /////////////////------------
 
-SEXP dnn(SEXP x, SEXP y, SEXP d, SEXP lonlat) {
+SEXP dnn(SEXP x, SEXP y, SEXP d1, SEXP d2, SEXP lonlat) {
   int nProtected=0;
   int q, n, ll;
   double x1[1], y1[1], x2[1], y2[1], gc[1];
-  double dist, xd;
+  double dist, xd1, xd2;
   ll = INTEGER_POINTER(lonlat)[0];
   
   R_len_t i, j, k;
@@ -261,7 +261,8 @@ SEXP dnn(SEXP x, SEXP y, SEXP d, SEXP lonlat) {
   PROTECT(y = coerceVector(y, REALSXP));
   ++nProtected;
   
-  xd = NUMERIC_POINTER(d)[0];
+  xd1 = NUMERIC_POINTER(d1)[0];
+  xd2 = NUMERIC_POINTER(d2)[0];
   
   xx=REAL(x);
   yy=REAL(y);
@@ -282,7 +283,7 @@ SEXP dnn(SEXP x, SEXP y, SEXP d, SEXP lonlat) {
         dist = gc[0];
       }
       
-      if (dist <= xd) {
+      if (dist <= xd2 && dist >= xd1) {
         xn[q] = j;
         q=q + 1;
       }

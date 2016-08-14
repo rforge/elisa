@@ -17,7 +17,7 @@ nclass(x,th)
 
 \arguments{
   \item{x}{ a RasterLayer or a numeric vector}
-  \item{th}{A threshold (default = 0.01) used to find the best number of classes}
+  \item{th}{A threshold (default = 0.005) used to find the best number of classes}
 }
 \details{
 The function uses an approach introduced in Naimi et al. (under review), to find the best number of classes (categories) when a continuous variable is discretizing. The threhold is corresponding to the acceptable level of information loose through discretizing procedure. For the details, see the reference.

@@ -1,9 +1,9 @@
 \name{dneigh}
 
 \alias{dneigh}
-\alias{dneigh,SpatialPoints,numeric-method}
-\alias{dneigh,SpatialPolygons,numeric-method}
-\alias{dneigh,data.frameORmatrix,numeric-method}
+\alias{dneigh,SpatialPoints-method}
+\alias{dneigh,SpatialPolygons-method}
+\alias{dneigh,data.frameORmatrix-method}
 
 
 \title{Construct neighbours list}
@@ -13,12 +13,13 @@ This function identifies the neighbours features (points or polygons) given the 
 }
 
 \usage{
-dneigh(x,d,longlat,method,...)
+dneigh(x,d1,d2,longlat,method,...)
 }
 
 \arguments{
   \item{x}{ a SpatialPoints, or SpatialPolygons or a matrix (or data.frame) of point coordinates or a SpatialPoints object}
-  \item{d}{ local distance  }
+  \item{d1}{ lower local distance bound }
+  \item{d2}{ upper local distance bound }
   \item{longlat}{ TRUE if point coordinates are longitude-latitude}
   \item{method}{if x is SpatialPolygons, specifies the method to identify the neighbour polygons; see details}
   \item{...}{ additional arguments; see details}

@@ -1,6 +1,8 @@
 \docType{class}
 \name{Entrogram-class}
 \alias{Entrogram-class}
+\alias{Variogram-class}
+\alias{Correlogram-class}
 \alias{data.frameORmatrix-class}
 \alias{matrixORnull-class}
 

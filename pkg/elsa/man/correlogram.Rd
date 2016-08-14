@@ -1,33 +1,33 @@
-\name{entrogram}
+\name{correlogram}
 
-\alias{entrogram}
-\alias{entrogram,RasterLayer-method}
-\alias{entrogram,SpatialPointsDataFrame-method}
-\alias{entrogram,SpatialPolygonsDataFrame-method}
+\alias{correlogram}
+\alias{correlogram,RasterLayer-method}
+\alias{correlogram,Spatial-method}
 
-\title{Entrogram for Spatial Data}
+
+\title{Correlogram from Spatial Data}
 
 \description{
-Compute sample (empirical) entrogram from spatial data. The function returns a binned entrogram and an entrogram cloud.
+Compute Correlogram from spatial data. The function returns a binned correlogram by calculating Moran's I (spatial autocorrelation) in different range of distances.
 }
 
 \usage{
-entrogram(x, width, cutoff,...) 
+correlogram(x, width, cutoff,...) 
 }
 
 \arguments{
-  \item{x}{ a spatial object (\code{RasterLayer} or \code{SpatialPoints} or \code{SpatialPolygons}) }
+  \item{x}{ a spatial object (\code{RasterLayer} or \code{SpatialPointsDataFrame} or \code{SpatialPolygonsDataFrame}) }
   \item{width}{ the lag size (width of subsequent distance intervals) into which cell pairs are grouped for semivariance estimates. If missing, the cell size (raster resolution) is assigned. }
   \item{cutoff}{ spatial separation distance up to which cell pairs are included in semivariance estimates; as a default, the length of the diagonal of the box spanning the data is divided by three. }
   \item{...}{Additional arguments including \code{zcol} (when \code{x} is Spatial* object, specifies the name of the variable in the dataset; \code{longlat} (when \code{x} is Spatial* object, spacifies whether the dataset has a geographic coordinate system); \code{s} (only when x is a Raster object, it would be useful when the dataset is big, so then by specifying \code{s}, the calculation would be based on a sample with size \code{s} drawn from the dataset, default is \code{NULL} means all cells should be contributed in the calculations)}
   
 }
 \details{
-Entrogram is a variogram-like graph to explore spatial structure in a single variable. An entrogram summarizes the spatial relations in the data, and can be used to understand within what range (distance) the data is spatially autocorrelated.
+Correlogram is a graph to explore spatial structure in a single variable. A correlogram summarizes the spatial relations in the data, and can be used to understand within what range (distance) the data is spatially autocorrelated.
 }
 
 \value{
-\item{Entrogram}{an object containing entrogram cloud and the entrogram within each distance interval}
+\item{Correlogram}{an object containing Moran's I values within each distance interval}
 }
 
 \references{
@@ -46,9 +46,9 @@ file <- system.file('external/dem_example.grd',package='elsa')
 r <- raster(file)
 plot(r,main='a continuous raster map')
 
-en <- entrogram(r, width=2000)
+co <- correlogram(r, width=2000,cutoff=30000)
 
-plot(en)
+plot(co)
 }
 
 

@@ -1,6 +1,6 @@
 # Author: Babak Naimi, naimi.b@gmail.com
 # Date :  July 2016
-# Version 1.1
+# Version 1.2
 # Licence GPL v3 
 
 
@@ -28,7 +28,7 @@ setMethod('categorize', signature(x='RasterLayer'),
             out <- raster(x)
             #-----
             if (canProcessInMemory(out)) {
-              out[] <- .Call('categorize', as.vector(x[]), as.vector(nc))
+              out[] <- .Call('categorize', as.vector(x[]), as.vector(nc), PACKAGE='elsa')
               if (filename != '') out <- writeRaster(out, filename, ...)
             } else {
               out <- writeStart(out, filename,...)
@@ -37,7 +37,7 @@ setMethod('categorize', signature(x='RasterLayer'),
               
               for (i in 1:tr$n) {
                 v <- getValues(x, row=tr$row[i], nrows=tr$nrows[i])
-                v <- .Call('categorize', v, as.vector(nc))
+                v <- .Call('categorize', v, as.vector(nc), PACKAGE='elsa')
                 out <- writeValues(out, v, 1)
                 pbStep(pb)
               }
@@ -65,7 +65,7 @@ setMethod('categorize', signature(x='numeric'),
               nc[1] <- nc[1] - n
               if (nc[length(nc)] < r[2]) nc[length(nc)] <- r[2]
             }
-            .Call('categorize', as.vector(x), as.vector(nc))
+            .Call('categorize', as.vector(x), as.vector(nc), PACKAGE='elsa')
           }
 )
 
