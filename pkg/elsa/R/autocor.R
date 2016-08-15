@@ -1,3 +1,7 @@
+# Author: Babak Naimi, naimi.b@gmail.com
+# Date :  August 2016
+# Version 1.1
+# Licence GPL v3 
 
 if (!isGeneric("moran")) {
   setGeneric("moran", function(x, d1, d2,...)
@@ -43,7 +47,7 @@ setMethod('moran', signature(x='Spatial'),
             
             x <- x@data[,zcol]
             
-            if (!is.numeric(x) || !is.integer(x)) stop('the variable specified through zcol is not a numeric variable')
+            if (!is.numeric(x) && !is.integer(x)) stop('the variable specified through zcol is not a numeric variable')
             
             .Call('moran_vector',x,d, PACKAGE='elsa')
           }
@@ -90,12 +94,11 @@ setMethod('geary', signature(x='Spatial'),
               zcol <- w
             } else if (is.numeric(zcol)) {
               zcol <- zcol[1]
-              if (zcol > ncol(x@data)) stop('the zcol number is greater than the number of columns in data!')
+              if (zcol > ncol(x@data)) stop('the specified number in zcol is greater than the number of columns in data!')
             } else stop("zcol should be a character or a number!")
             
-            x <- x@data[,zcol]
-            
-            if (!is.numeric(x) || !is.integer(x)) stop('the variable specified through zcol is not a numeric variable')
+            x <- x@data[,zcol,drop=TRUE]
+            if (!is.numeric(x) && !is.integer(x)) stop('the variable specified through zcol is not a numeric variable')
             
             .Call('geary_vector',x,d, PACKAGE='elsa')
           }
