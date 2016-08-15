@@ -1,8 +1,7 @@
 \name{lisa}
 
 \alias{lisa}
-\alias{lisa,SpatialPointsDataFrame-method}
-\alias{lisa,SpatialPolygonsDataFrame-method}
+\alias{lisa,Spatial-method}
 \alias{lisa,RasterLayer-method}
 
 

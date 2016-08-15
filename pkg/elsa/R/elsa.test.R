@@ -1,6 +1,6 @@
 # Author: Babak Naimi, naimi.b@gmail.com
-# Date :  July 2016
-# Version 2.2
+# Date :  August 2016
+# Version 2.3
 # Licence GPL v3 
 
 if (!isGeneric("elsa.test")) {
@@ -157,7 +157,7 @@ setMethod('elsa.test', signature(x='RasterLayer'),
                 } else {
                   v <- .Call('elsac_test', v , vn, as.integer(ncl), as.integer(nrw), as.integer(nc), as.integer(w[,1]), as.integer(w[,2]),as.integer(classes),dif,as.integer(method),as.integer(n), PACKAGE='elsa')
                 }
-                st <- (addr * nc)+1
+                st <- (addr * ncl)+1
                 ex <- length(v)
                 out <- writeValues(out, v[st:ex], tr$row[i])
                 pbStep(pb)

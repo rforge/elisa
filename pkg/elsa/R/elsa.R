@@ -1,6 +1,6 @@
 # Author: Babak Naimi, naimi.b@gmail.com
 # Date :  August 2016
-# Version 2.0
+# Version 2.1
 # Licence GPL v3 
 
 
@@ -341,7 +341,7 @@ setMethod('elsa', signature(x='RasterLayer'),
                 else if (stat == 'l') v <- v[[2]]
                 else v <- v[[1]]
                 
-                st <- (addr * nc)+1
+                st <- (addr * ncl)+1
                 ex <- length(v)
                 out <- writeValues(out, v[st:ex], tr$row[i])
                 pbStep(pb)

@@ -1,6 +1,6 @@
 # Author: Babak Naimi, naimi.b@gmail.com
 # Date :  August 2016
-# Version 1.0
+# Version 1.1
 # Licence GPL v3 
 
 if (!isGeneric("correlogram")) {
@@ -66,7 +66,7 @@ setMethod('correlogram', signature(x='RasterLayer'),
 ##########
 
 setMethod('correlogram', signature(x='Spatial'), 
-          function(x, width, cutoff, zcol, longlat,...) {
+          function(x, width, cutoff, zcol, longlat,s=NULL,...) {
             if (!class(x) %in% c('SpatialPolygonsDataFrame','SpatialPointsDataFrame')) stop('x can only be either of RasterLayer, SpatialPointsDataFrame, SpatialPolygonsDataFrame')
             
             n <- nrow(x)
@@ -97,8 +97,8 @@ setMethod('correlogram', signature(x='Spatial'),
             #---
             if (!is.null(s) && is.numeric(s) && s < n) {
               x <- x[sample(n,s)]
-              n <- length(n)
-            } 
+              n <- length(x)
+            }
             #######---------------
             out <- new("Correlogram")
             out@width <- width

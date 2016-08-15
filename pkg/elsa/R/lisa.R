@@ -1,6 +1,6 @@
 # Author: Babak Naimi, naimi.b@gmail.com
-# Date :  July 2016
-# Version 1.0
+# Date :  August 2016
+# Version 1.1
 # Licence GPL v3 
 
 #----------
@@ -109,7 +109,7 @@ setMethod('lisa', signature(x='RasterLayer'),
                 else v <- v[[2]]
               }
               
-              st <- (addr * nc)+1
+              st <- (addr * ncl)+1
               ex <- length(v)
               out <- writeValues(out, v[st:ex], tr$row[i])
               pbStep(pb)
