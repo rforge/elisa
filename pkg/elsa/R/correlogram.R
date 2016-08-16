@@ -1,6 +1,6 @@
 # Author: Babak Naimi, naimi.b@gmail.com
 # Date :  August 2016
-# Version 1.1
+# Version 1.2
 # Licence GPL v3 
 
 if (!isGeneric("correlogram")) {
@@ -10,7 +10,7 @@ if (!isGeneric("correlogram")) {
 
 
 setMethod('correlogram', signature(x='RasterLayer'), 
-          function(x, width, cutoff, s=NULL,...) {
+          function(x, width, cutoff, ...) {
             re <- res(x)[1]
             if (missing(cutoff)) cutoff<- sqrt((xmin(x)-xmax(x))^2+(ymin(x)-ymax(x))^2) / 3
             if (missing(width)) width <- re
@@ -20,30 +20,30 @@ setMethod('correlogram', signature(x='RasterLayer'),
             
             n <- ncell(x) - cellStats(x,'countNA')
             #---
-            if (is.null(s)) {
-              if (!.checkrasterMemory(n,nlag)) {
-                s <- c()
-                for (i in (nlag-1):1) s <- c(s,.checkrasterMemory(n,i))
-                s <- which(s)
-                if (length(s) > 0) {
-                  s <- (nlag - s[1]) / (2*nlag)
-                  s <- ceiling(n * s)
-                  s <- sampleRandom(x,s,cells=TRUE)[,1]
-                } else {
-                  s <- 1 / (2 * nlag)
-                  s <- ceiling(n * s)
-                  while (!.checkrasterMemory(s,1)) s <- ceiling(s / 2)
-                  s <- sampleRandom(x,s,cells=TRUE)[,1]
-                }
-              } else {
-                s <- (1:ncell(x))[which(!is.na(x[]))]
-              }
-            } else {
-              if (!is.numeric(s)) stop("s argument should be an integer number or NULL!")
-              while (!.checkrasterMemory(s[1],1)) s <- ceiling(s[1] * 0.8)
-              if (s > n) s <- n
-              s <- sampleRandom(x,s,cells=TRUE)[,1]
-            }
+            # if (is.null(s)) {
+            #   if (!.checkrasterMemory(n,nlag)) {
+            #     s <- c()
+            #     for (i in (nlag-1):1) s <- c(s,.checkrasterMemory(n,i))
+            #     s <- which(s)
+            #     if (length(s) > 0) {
+            #       s <- (nlag - s[1]) / (2*nlag)
+            #       s <- ceiling(n * s)
+            #       s <- sampleRandom(x,s,cells=TRUE)[,1]
+            #     } else {
+            #       s <- 1 / (2 * nlag)
+            #       s <- ceiling(n * s)
+            #       while (!.checkrasterMemory(s,1)) s <- ceiling(s / 2)
+            #       s <- sampleRandom(x,s,cells=TRUE)[,1]
+            #     }
+            #   } else {
+            #     s <- (1:ncell(x))[which(!is.na(x[]))]
+            #   }
+            # } else {
+            #   if (!is.numeric(s)) stop("s argument should be an integer number or NULL!")
+            #   while (!.checkrasterMemory(s[1],1)) s <- ceiling(s[1] * 0.8)
+            #   if (s > n) s <- n
+            #   s <- sampleRandom(x,s,cells=TRUE)[,1]
+            # }
             
             #######---------------------
             out <- new("Correlogram")
@@ -55,7 +55,7 @@ setMethod('correlogram', signature(x='RasterLayer'),
               d1 <- (i -1) * width
               d2 <- d1 + width
               w <-.Filter(r=res(x)[1],d1=d1,d2=d2)[[2]]
-              w <- .Call('moran',as.vector(x[s]),as.integer(ncol(x)),as.integer(nrow(x)),as.integer(w[,1]),as.integer(w[,2]), PACKAGE='elsa')
+              w <- .Call('moran',as.vector(x[]),as.integer(ncol(x)),as.integer(nrow(x)),as.integer(w[,1]),as.integer(w[,2]), PACKAGE='elsa')
               w <- w[!is.infinite(w)]
               w <- w[!is.na(w)]
               out@correlogram [i,2] <- mean(w)
@@ -96,8 +96,10 @@ setMethod('correlogram', signature(x='Spatial'),
             x <- x@data[,zcol]
             #---
             if (!is.null(s) && is.numeric(s) && s < n) {
-              x <- x[sample(n,s)]
+              s <- sample(n,s)
+              x <- x[s]
               n <- length(x)
+              xy <- xy[s,]
             }
             #######---------------
             out <- new("Correlogram")
